@@ -137,7 +137,7 @@ public class ApiClient implements TextApi, ImageApi{
 		basePost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 		
 		basePost.addHeader("client-lib", "java");
-		basePost.addHeader("client-lib", "1.4");
+		basePost.addHeader("client-lib", "2.1");
 		
 		HttpResponse response = httpClient.execute(basePost);
 		HttpEntity entity = response.getEntity();
@@ -172,7 +172,7 @@ public class ApiClient implements TextApi, ImageApi{
 
 		basePost.addHeader("content-type", "application/x-www-form-urlencoded");
 		basePost.addHeader("client-lib", "java");
-		basePost.addHeader("client-lib", "1.4");
+		basePost.addHeader("client-lib", "2.1");
 		
 		HttpResponse response = httpClient.execute(basePost);
 		HttpEntity entity = response.getEntity();
