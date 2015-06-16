@@ -2,7 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>indicoio-java</groupId>
   <artifactId>indicoio-java</artifactId>
-  <version>0.1.4</version>
+  <version>0.2.0</version>
+  <packaging>jar</packaging>
   <name>indico</name>
   <description>A Java Wrapper for indico. Use pre-built state of the art machine learning algorithms with a single line of code.</description>
   <url>http://indico.io</url>
@@ -13,6 +14,19 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  <developers>
+    <developer>
+      <name>Slater Victoroff</name>
+      <email>slater@indico.io</email>
+      <organization>indico</organization>
+      <organizationUrl>http://indico.io</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</connection>
+    <developerConnection>scm:git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</developerConnection>
+    <url>git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</url>
+  </scm>
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
