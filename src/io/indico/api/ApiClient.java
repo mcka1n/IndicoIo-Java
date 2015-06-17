@@ -31,6 +31,7 @@ import com.google.gson.Gson;
 public class ApiClient implements TextApi, ImageApi{
 
 	private static HttpClient httpClient = HttpClients.createDefault();
+	private static final String version = "2.0.0";
 	public String baseUrl;
 	public String name;
 	public String baseEndpoint;
@@ -137,7 +138,7 @@ public class ApiClient implements TextApi, ImageApi{
 		basePost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
 		
 		basePost.addHeader("client-lib", "java");
-		basePost.addHeader("client-lib", "2.1");
+		basePost.addHeader("version-number", version);
 		
 		HttpResponse response = httpClient.execute(basePost);
 		HttpEntity entity = response.getEntity();
@@ -172,7 +173,7 @@ public class ApiClient implements TextApi, ImageApi{
 
 		basePost.addHeader("content-type", "application/x-www-form-urlencoded");
 		basePost.addHeader("client-lib", "java");
-		basePost.addHeader("client-lib", "2.1");
+		basePost.addHeader("version-number", version);
 		
 		HttpResponse response = httpClient.execute(basePost);
 		HttpEntity entity = response.getEntity();

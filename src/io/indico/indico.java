@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015, indico and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ */
 package io.indico;
 
 import java.awt.image.BufferedImage;
