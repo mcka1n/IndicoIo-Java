@@ -1,6 +1,6 @@
 package io.indico.test;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.indico.indico;
 import io.indico.api.image.FacialEmotion;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
+import io.indico.indico;
 
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 public class ApiTest {
 	
@@ -50,7 +50,7 @@ public class ApiTest {
 	@Test
 	public void testSentiment() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		assertTrue(test.sentiment("this is great!") > 0.5);
+		assertTrue(test.sentiment("this is great!").sentiment() > 0.5);
 	}
 	
 	@Test
@@ -59,7 +59,7 @@ public class ApiTest {
 		List<String> examples = new ArrayList<String>();
 		examples.add("this is great!");
 		examples.add("this is awful!");
-		List<Double> results = test.sentiment(examples);
+		List<Double> results = test.sentiment(examples).sentiment();
 		assertTrue(results.get(0) > 0.5);
 		assertTrue(results.get(1) < 0.5);
 	}
@@ -67,7 +67,7 @@ public class ApiTest {
 	@Test
 	public void testBatchSentimentArray() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		List<Double> results = test.sentiment(new String[]{"this is great!", "this is awful!"});
+		List<Double> results = test.sentiment(new String[]{"this is great!", "this is awful!"}).sentiment();
 		assertTrue(results.get(0) > 0.5);
 		assertTrue(results.get(1) < 0.5);
 	}
@@ -75,7 +75,7 @@ public class ApiTest {
 	@Test
 	public void testSentimentHQ() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		assertTrue(test.sentimentHQ("this is great!") > 0.5);
+		assertTrue(test.sentimentHQ("this is great!").sentimentHQ() > 0.5);
 	}
 	
 	@Test
@@ -84,7 +84,7 @@ public class ApiTest {
 		List<String> examples = new ArrayList<String>();
 		examples.add("this is great!");
 		examples.add("this is awful!");
-		List<Double> results = test.sentimentHQ(examples);
+		List<Double> results = test.sentimentHQ(examples).sentimentHQ();
 		assertTrue(results.get(0) > 0.5);
 		assertTrue(results.get(1) < 0.5);
 	}
@@ -92,7 +92,7 @@ public class ApiTest {
 	@Test
 	public void testBatchSentimentHQArray() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		List<Double> results = test.sentimentHQ(new String[]{"this is great!", "this is awful!"});
+		List<Double> results = test.sentimentHQ(new String[]{"this is great!", "this is awful!"}).sentimentHQ();
 		assertTrue(results.get(0) > 0.5);
 		assertTrue(results.get(1) < 0.5);
 	}
@@ -100,7 +100,7 @@ public class ApiTest {
 	@Test
 	public void testPolitical() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		assertTrue(test.political("test").size() == PoliticalClass.values().length);
+		assertTrue(test.political("test").political().size() == PoliticalClass.values().length);
 	}
 	
 	@Test
@@ -109,7 +109,7 @@ public class ApiTest {
 		List<String> examples = new ArrayList<String>();
 		examples.add("this is great!");
 		examples.add("this is awful!");
-		List<Map<PoliticalClass, Double>> results = test.political(examples);
+		List<Map<PoliticalClass, Double>> results = test.political(examples).political();
 		assertTrue(results.size() == 2);
 		assertTrue(results.get(0).size() == PoliticalClass.values().length);
 	}
@@ -117,7 +117,7 @@ public class ApiTest {
 	@Test
 	public void testBatchPoliticalArray() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		List<Map<PoliticalClass, Double>> results = test.political(new String[]{"this is great!", "this is awful!"});
+		List<Map<PoliticalClass, Double>> results = test.political(new String[]{"this is great!", "this is awful!"}).political();
 		assertTrue(results.size() == 2);
 		assertTrue(results.get(0).size() == PoliticalClass.values().length);
 	}
@@ -125,7 +125,7 @@ public class ApiTest {
 	@Test
 	public void testLanguage() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		assertTrue(test.language("test").size() == Language.values().length);
+		assertTrue(test.language("test").language().size() == Language.values().length);
 	}
 	
 	@Test
@@ -134,7 +134,7 @@ public class ApiTest {
 		List<String> examples = new ArrayList<String>();
 		examples.add("this is great!");
 		examples.add("this is awful!");
-		List<Map<Language, Double>> results = test.language(examples);
+		List<Map<Language, Double>> results = test.language(examples).language();
 		assertTrue(results.size() == 2);
 		assertTrue(results.get(0).size() == Language.values().length);
 	}
@@ -142,7 +142,7 @@ public class ApiTest {
 	@Test
 	public void testBatchLanguageArray() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		List<Map<Language, Double>> results = test.language(new String[]{"this is great!", "this is awful!"});
+		List<Map<Language, Double>> results = test.language(new String[]{"this is great!", "this is awful!"}).language();
 		assertTrue(results.size() == 2);
 		assertTrue(results.get(0).size() == Language.values().length);
 	}
@@ -150,7 +150,7 @@ public class ApiTest {
 	@Test
 	public void testTextTags() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		assertTrue(test.textTags("test").size() == TextTag.values().length);
+		assertTrue(test.textTags("test").textTags().size() == TextTag.values().length);
 	}
 	
 	@Test
@@ -159,7 +159,7 @@ public class ApiTest {
 		List<String> examples = new ArrayList<String>();
 		examples.add("this is great!");
 		examples.add("this is awful!");
-		List<Map<TextTag, Double>> results = test.textTags(examples);
+		List<Map<TextTag, Double>> results = test.textTags(examples).textTags();
 		assertTrue(results.size() == 2);
 		assertTrue(results.get(0).size() == TextTag.values().length);
 	}
@@ -167,7 +167,7 @@ public class ApiTest {
 	@Test
 	public void testBatchTextTagArray() throws IOException {
 		indico test = new indico(new File("config.properties"));
-		List<Map<TextTag, Double>> results = test.textTags(new String[]{"this is great!", "this is awful!"});
+		List<Map<TextTag, Double>> results = test.textTags(new String[]{"this is great!", "this is awful!"}).textTags();
 		assertTrue(results.size() == 2);
 		assertTrue(results.get(0).size() == TextTag.values().length);
 	}
@@ -176,7 +176,7 @@ public class ApiTest {
 	public void testFER() throws IOException {
 		indico test = new indico(new File("config.properties"));
         
-        Map<FacialEmotion, Double> results = test.fer("bin/lena.png");
+        Map<FacialEmotion, Double> results = test.fer("bin/lena.png").fer();
 		assertTrue(results.size() == FacialEmotion.values().length);
 	}
 	
@@ -188,7 +188,7 @@ public class ApiTest {
 		lenas.add("bin/lena.png");
 		lenas.add("bin/lena.png");
 		
-        List<Map<FacialEmotion, Double>> results = test.fer(lenas);
+        List<Map<FacialEmotion, Double>> results = test.fer(lenas).fer();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
 	}
@@ -197,7 +197,7 @@ public class ApiTest {
 	public void testImageFeatures() throws IOException {
 		indico test = new indico(new File("config.properties"));
         
-        List<Double> results = test.imageFeatures("bin/lena.png");
+        List<Double> results = test.imageFeatures("bin/lena.png").imageFeatures();
 		assertTrue(results.size() == 2048);
 	}
 	
@@ -209,7 +209,7 @@ public class ApiTest {
 		lenas.add("bin/lena.png");
 		lenas.add("bin/lena.png");
 		
-        List<List<Double>> results = test.imageFeatures(lenas);
+        List<List<Double>> results = test.imageFeatures(lenas).imageFeatures();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
 	}
@@ -218,7 +218,7 @@ public class ApiTest {
 	public void testFacialFeatures() throws IOException {
 		indico test = new indico(new File("config.properties"));
         
-        List<Double> results = test.facialFeatures("bin/lena.png");
+        List<Double> results = test.facialFeatures("bin/lena.png").facialFeatures();
 		assertTrue(results.size() == 48);
 	}
 	
@@ -230,7 +230,7 @@ public class ApiTest {
 		lenas.add("bin/lena.png");
 		lenas.add("bin/lena.png");
 		
-        List<List<Double>> results = test.facialFeatures(lenas);
+        List<List<Double>> results = test.facialFeatures(lenas).facialFeatures();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
 	}

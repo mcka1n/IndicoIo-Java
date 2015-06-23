@@ -1,5 +1,19 @@
 package io.indico.api;
 
+import com.google.gson.Gson;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,186 +26,52 @@ import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import io.indico.api.results.BatchIndicoResult;
+import io.indico.api.results.IndicoResult;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
+public class ApiClient {
+    private final static String PUBLIC_BASE_URL = "https://apiv2.indico.io";
 
-import com.google.gson.Gson;
+    private static HttpClient httpClient = HttpClients.createDefault();
+    public String baseUrl;
+    public String baseEndpoint;
+    public String batchEndpoint;
 
-public class ApiClient implements TextApi, ImageApi{
 
-	private static HttpClient httpClient = HttpClients.createDefault();
-	public String baseUrl;
-	public String name;
-	public String baseEndpoint;
-	public String batchEndpoint;
-	
-	public ApiClient(String api, String apiKey) {
-		if (apiKey == null){
-			throw new IllegalArgumentException("Api Key cannot be null");
-		}
-		this.baseUrl = "https://apiv2.indico.io";
-		name = api;
-		baseEndpoint = this.baseUrl + "/" + api.toLowerCase() + "?key=" + apiKey;
-		batchEndpoint = this.baseUrl + "/" + api.toLowerCase() + "/batch" + "?key=" + apiKey;
-	}
-	
-	public ApiClient(String api, String apiKey, String privateCloud) {
-		if (apiKey == null){
-			throw new IllegalArgumentException("Private Cloud cannot be null");
-		}
-		this.baseUrl = "https://" + privateCloud + ".indico.domains";
-		this.name = api;
-		this.baseEndpoint = this.baseUrl + "/" + api.toLowerCase() + "?key=" + apiKey;
-		this.batchEndpoint = this.baseUrl + "/" + api.toLowerCase() + "/batch" + "?key=" + apiKey;
- 	}
-	
-	@Override
-	public Double sentimentCall(String data) 
-			throws UnsupportedOperationException, IOException {
-		
-		Map<String, ?> apiResponse = baseCall(data);
-	    return (Double) apiResponse.get("results");
-	}
+    public ApiClient(String apiKey) {
+        this(PUBLIC_BASE_URL, apiKey, null);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Map<String, Double> call(String data)
-			throws UnsupportedOperationException, IOException {
-		
-		Map<String, ?> apiResponse = baseCall(data);
-		return (Map<String, Double>) apiResponse.get("results");
-	}
+    private ApiClient(String baseUrl, String apiKey, String privateCloud) {
+        if (apiKey == null) {
+            throw new IllegalArgumentException("Private Cloud cannot be null");
+        }
 
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Double> sentimentCall(List<String> data)
-			throws ClientProtocolException, IOException {
-		
-		Map<String, List<?>> apiResponse = baseCall(data);
-		return (List<Double>) apiResponse.get("results");
-	}
+        this.baseUrl = privateCloud == null ?
+                baseUrl : "https://" + privateCloud + ".indico.domains";
+        this.baseEndpoint = this.baseUrl + "/%1$2s?key=" + apiKey;
+        this.batchEndpoint = this.baseUrl + "/%1$2s/batch" + "?key=" + apiKey;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Map<String, Double>> call(List<String> data) 
-			throws ClientProtocolException, IOException {
-		
-		Map<String, List<?>> apiResponse = baseCall(data);
-		return (List<Map<String, Double>>) apiResponse.get("results");
-	}
+    public ApiClient(String apiKey, String privateCloud) {
+        this(PUBLIC_BASE_URL, apiKey, privateCloud);
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Map<String, Double> imageCall(BufferedImage image, String type) 
-			throws UnsupportedOperationException, IOException {
-        
-        Map<String, ?> apiResponse = baseCall(encodeImage(image, type));
-		return (Map<String, Double>) apiResponse.get("results");
-	}
+    public IndicoResult call(Api api, BufferedImage data, String type, Map<String, Object> extraParams)
+            throws UnsupportedOperationException, IOException {
+        return call(api, encodeImage(data, type), extraParams);
+    }
 
-	@Override
-	public List<Map<String, Double>> imageCall(List<BufferedImage> images, String type) throws UnsupportedOperationException, IOException{
-		List<Map<String, Double>> response = new ArrayList<Map<String, Double>>();
-		for (BufferedImage image: images){
-			response.add(imageCall(image, type));
-		}
-		return response;
-	}
+    @SuppressWarnings("unchecked")
+    public IndicoResult call(Api api, String data, Map<String, Object> extraParams)
+            throws UnsupportedOperationException, IOException {
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Double> featureCall(BufferedImage image, String type) 
-			throws UnsupportedOperationException, IOException {
-        Map<String, ?> apiResponse = baseCall(encodeImage(image, type));
-		return (List<Double>) apiResponse.get("results");
-	}
+        Map<String, ?> apiResponse = baseCall(api.name, data, extraParams);
+        return new IndicoResult(api, apiResponse);
+    }
 
-	@Override
-	public List<List<Double>> featureCall(List<BufferedImage> images, String type)
-			throws UnsupportedOperationException, IOException {
-		List<List<Double>> response = new ArrayList<List<Double>>();
-		for (BufferedImage image: images){
-			response.add(featureCall(image, type));
-		}
-		return response;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Map<String, ?> baseCall(String data) throws UnsupportedOperationException, IOException{
-		HttpPost basePost = new HttpPost(baseEndpoint);
-		
-		List<NameValuePair> params = new ArrayList<NameValuePair>(1);
-		params.add(new BasicNameValuePair("data", data));
-		basePost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-		
-		basePost.addHeader("client-lib", "java");
-		basePost.addHeader("client-lib", "1.4");
-		
-		HttpResponse response = httpClient.execute(basePost);
-		HttpEntity entity = response.getEntity();
-
-		@SuppressWarnings("rawtypes")
-		Map<String, ?> apiResponse = new HashMap();
-		if (entity != null) {
-		    InputStream responseStream = entity.getContent();
-		    try {
-		    	String responseString = IOUtils.toString(responseStream, "UTF-8"); 
-		    	apiResponse = new Gson().fromJson(responseString, Map.class);
-		    	if (apiResponse.containsKey("error")) {
-		    		throw new IllegalArgumentException((String) apiResponse.get("error"));
-		    	}
-		    } finally {
-		        responseStream.close();
-		    }
-		}
-		return apiResponse;
-
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Map<String, List<?>> baseCall(List<String> data) throws ClientProtocolException, IOException{
-		HttpPost basePost = new HttpPost(batchEndpoint);
-		
-		Map<String, List<String>> rawParams = new HashMap<String, List<String>>();
-		rawParams.put("data", data);
-		
-		StringEntity params = new StringEntity(new Gson().toJson(rawParams));
-        basePost.setEntity(params);
-
-		basePost.addHeader("content-type", "application/x-www-form-urlencoded");
-		basePost.addHeader("client-lib", "java");
-		basePost.addHeader("client-lib", "1.4");
-		
-		HttpResponse response = httpClient.execute(basePost);
-		HttpEntity entity = response.getEntity();
-	
-		Map<String, List<?>> apiResponse = new HashMap<String, List<?>>();
-		if (entity != null) {
-		    InputStream responseStream = entity.getContent();
-		    Reader reader = new InputStreamReader(responseStream, "UTF-8");
-		    try {
-		    	apiResponse = new Gson().fromJson(reader, Map.class);
-		    } finally {
-		        responseStream.close();
-		    }
-		}
-		return apiResponse;
-	}
-	
-	private String encodeImage(BufferedImage image, String type){
-		String imageString = null;
+    private String encodeImage(BufferedImage image, String type) {
+        String imageString = null;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try {
@@ -204,7 +84,93 @@ public class ApiClient implements TextApi, ImageApi{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         return imageString;
-	}
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, ?> baseCall(String api, String data, Map<String, Object> extraParams) throws UnsupportedOperationException, IOException {
+        HttpPost basePost = new HttpPost(String.format(baseEndpoint, api));
+
+        List<NameValuePair> params = new ArrayList<>(1);
+        params.add(new BasicNameValuePair("data", data));
+        basePost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+        basePost.addHeader("client-lib", "java");
+        basePost.addHeader("client-lib", "1.4");
+
+        HttpResponse response = httpClient.execute(basePost);
+        HttpEntity entity = response.getEntity();
+
+        @SuppressWarnings("rawtypes")
+        Map<String, ?> apiResponse = new HashMap();
+        if (entity != null) {
+            InputStream responseStream = entity.getContent();
+            try {
+                String responseString = IOUtils.toString(responseStream, "UTF-8");
+                apiResponse = new Gson().fromJson(responseString, Map.class);
+                if (apiResponse.containsKey("error")) {
+                    throw new IllegalArgumentException((String) apiResponse.get("error"));
+                }
+            } finally {
+                responseStream.close();
+            }
+        }
+        return apiResponse;
+
+    }
+
+    public BatchIndicoResult call(Api api, List<BufferedImage> data, String type, Map<String, Object> extraParams)
+            throws UnsupportedOperationException, IOException {
+        List<String> batchedData = new ArrayList<>(data.size());
+        for (BufferedImage image : data)
+            batchedData.add(encodeImage(image, type));
+        return call(api, batchedData, extraParams);
+    }
+
+    public BatchIndicoResult call(Api api, List<String> data, Map<String, Object> extraParams)
+            throws UnsupportedOperationException, IOException {
+
+        Map<String, List<?>> apiResponse = baseCall(api.name, data, extraParams);
+        return new BatchIndicoResult(api, apiResponse);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, List<?>> baseCall(String api, List<String> data, Map<String, Object> extraParams) throws IOException {
+        HttpPost basePost = new HttpPost(String.format(batchEndpoint, api));
+
+        Map<String, Object> rawParams = extraParams != null ? extraParams : new HashMap<String, Object>();
+        rawParams.put("data", data);
+
+        StringEntity params = new StringEntity(new Gson().toJson(rawParams));
+        basePost.setEntity(params);
+
+        basePost.addHeader("content-type", "application/x-www-form-urlencoded");
+        basePost.addHeader("client-lib", "java");
+        basePost.addHeader("client-lib", "1.4");
+
+        HttpResponse response = httpClient.execute(basePost);
+        HttpEntity entity = response.getEntity();
+
+        Map<String, List<?>> apiResponse = new HashMap<>();
+        if (entity != null) {
+            InputStream responseStream = entity.getContent();
+            Reader reader = new InputStreamReader(responseStream, "UTF-8");
+            try {
+                apiResponse = new Gson().fromJson(reader, Map.class);
+            } finally {
+                responseStream.close();
+            }
+        }
+        return apiResponse;
+    }
+
+    public BatchIndicoResult call(Api api, Map<BufferedImage, String> data, Map<String, Object> extraParams)
+            throws UnsupportedOperationException, IOException {
+        List<String> batchedData = new ArrayList<>(data.size());
+        for (Map.Entry<BufferedImage, String> entry : data.entrySet())
+            batchedData.add(encodeImage(entry.getKey(), entry.getValue()));
+
+        return call(api, batchedData, extraParams);
+    }
 }
