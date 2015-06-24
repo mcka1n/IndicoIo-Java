@@ -1,8 +1,10 @@
 package io.indico.api.utils;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +16,24 @@ import javax.imageio.ImageIO;
  * Created by Chris on 6/23/15.
  */
 public class ImageUtils {
+    public static String encodeImage(BufferedImage image, String type) {
+        String imageString = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        try {
+            ImageIO.write(image, type, bos);
+            byte[] imageBytes = bos.toByteArray();
+
+            imageString = Base64.encodeBase64String(imageBytes);
+
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return imageString;
+    }
+
     public static List<BufferedImage> convertToImage(List<?> images) throws IOException {
         List<BufferedImage> convertedInput = new ArrayList<BufferedImage>();
         for (Object entry : images) {

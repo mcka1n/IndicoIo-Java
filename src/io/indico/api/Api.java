@@ -1,7 +1,5 @@
 package io.indico.api;
 
-import io.indico.api.utils.IndicoException;
-
 /**
  * Created by Chris on 6/22/15.
  */
@@ -12,11 +10,13 @@ public enum Api {
     Political("political"),
     Language("language"),
     TextTags("texttags"),
+    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags),
 
     // IMAGE APIS
     FER("fer", true),
     ImageFeatures("imagefeatures", true),
-    FacialFeatures("facialfeatures", true);
+    FacialFeatures("facialfeatures", true),
+    MultiImage("apis", FER, ImageFeatures, FacialFeatures);
 
     public String name;
     public boolean isImageApi;
@@ -40,17 +40,16 @@ public enum Api {
         this.results = apis;
     }
 
-    static Api from(String name) throws IndicoException {
-        for (Api api : Api.values()) {
-            if (name.equals(api.name))
-                return api;
-        }
-
-        throw new IndicoException(name + " is not a valid api name");
-    }
-
     public Api[] getResults() {
         return results;
     }
 
+    public boolean isImage() {
+        return isImageApi;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
