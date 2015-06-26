@@ -16,9 +16,10 @@ public enum Api {
     FER("fer", true),
     ImageFeatures("imagefeatures", true),
     FacialFeatures("facialfeatures", true),
-    MultiImage("apis", FER, ImageFeatures, FacialFeatures);
+    MultiImage("apis", true, FER, ImageFeatures, FacialFeatures);
 
     public String name;
+    public String type;
     public boolean isImageApi;
     public Api[] results;
 
@@ -29,6 +30,7 @@ public enum Api {
     Api(String name, boolean isImageApi) {
         this.isImageApi = isImageApi;
         this.name = name;
+        this.type = isImageApi ? "image" : "text";
     }
 
     Api(String name, Api... apis) {
@@ -50,6 +52,10 @@ public enum Api {
 
     @Override
     public String toString() {
+        return name;
+    }
+
+    public String getName() {
         return name;
     }
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +28,14 @@ public class ApiTest {
     @Test(expected = IllegalArgumentException.class)
     public void testBadCall() throws UnsupportedOperationException, IOException, IndicoException {
         indico test = new indico("notanapikey");
-        test.sentiment("this is going to error!");
+        test.sentiment.predict("this is going to error!");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNoApiKey() throws UnsupportedOperationException, IOException, IndicoException {
         String emptyString = null;
         indico test = new indico(emptyString);
-        test.sentiment("this is going to error!");
+        test.sentiment.predict("this is going to error!");
     }
 
     @Test
@@ -54,7 +55,7 @@ public class ApiTest {
     @Test
     public void testSentiment() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        assertTrue(test.sentiment("this is great!").getSentiment() > 0.5);
+        assertTrue(test.sentiment.predict("this is great!").getSentiment() > 0.5);
     }
 
     @Test
@@ -63,7 +64,7 @@ public class ApiTest {
         List<String> examples = new ArrayList<String>();
         examples.add("this is great!");
         examples.add("this is awful!");
-        List<Double> results = test.sentiment(examples).getSentiment();
+        List<Double> results = test.sentiment.predict(examples).getSentiment();
         assertTrue(results.get(0) > 0.5);
         assertTrue(results.get(1) < 0.5);
     }
@@ -71,7 +72,7 @@ public class ApiTest {
     @Test
     public void testBatchSentimentArray() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        List<Double> results = test.sentiment(new String[]{"this is great!", "this is awful!"}).getSentiment();
+        List<Double> results = test.sentiment.predict(new String[]{"this is great!", "this is awful!"}).getSentiment();
         assertTrue(results.get(0) > 0.5);
         assertTrue(results.get(1) < 0.5);
     }
@@ -79,7 +80,7 @@ public class ApiTest {
     @Test
     public void testSentimentHQ() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        assertTrue(test.sentimentHQ("this is great!").getSentimentHQ() > 0.5);
+        assertTrue(test.sentimentHQ.predict("this is great!").getSentimentHQ() > 0.5);
     }
 
     @Test
@@ -88,7 +89,7 @@ public class ApiTest {
         List<String> examples = new ArrayList<String>();
         examples.add("this is great!");
         examples.add("this is awful!");
-        List<Double> results = test.sentimentHQ(examples).getSentimentHQ();
+        List<Double> results = test.sentimentHQ.predict(examples).getSentimentHQ();
         assertTrue(results.get(0) > 0.5);
         assertTrue(results.get(1) < 0.5);
     }
@@ -96,7 +97,7 @@ public class ApiTest {
     @Test
     public void testBatchSentimentHQArray() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        List<Double> results = test.sentimentHQ(new String[]{"this is great!", "this is awful!"}).getSentimentHQ();
+        List<Double> results = test.sentimentHQ.predict(new String[]{"this is great!", "this is awful!"}).getSentimentHQ();
         assertTrue(results.get(0) > 0.5);
         assertTrue(results.get(1) < 0.5);
     }
@@ -104,7 +105,7 @@ public class ApiTest {
     @Test
     public void testPolitical() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        assertTrue(test.political("test").getPolitical().size() == PoliticalClass.values().length);
+        assertTrue(test.political.predict("test").getPolitical().size() == PoliticalClass.values().length);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class ApiTest {
         List<String> examples = new ArrayList<String>();
         examples.add("this is great!");
         examples.add("this is awful!");
-        List<Map<PoliticalClass, Double>> results = test.political(examples).getPolitical();
+        List<Map<PoliticalClass, Double>> results = test.political.predict(examples).getPolitical();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).size() == PoliticalClass.values().length);
     }
@@ -121,7 +122,7 @@ public class ApiTest {
     @Test
     public void testBatchPoliticalArray() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        List<Map<PoliticalClass, Double>> results = test.political(new String[]{"this is great!", "this is awful!"}).getPolitical();
+        List<Map<PoliticalClass, Double>> results = test.political.predict(new String[]{"this is great!", "this is awful!"}).getPolitical();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).size() == PoliticalClass.values().length);
     }
@@ -129,7 +130,7 @@ public class ApiTest {
     @Test
     public void testLanguage() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        assertTrue(test.language("test").getLanguage().size() == Language.values().length);
+        assertTrue(test.language.predict("test").getLanguage().size() == Language.values().length);
     }
 
     @Test
@@ -138,7 +139,7 @@ public class ApiTest {
         List<String> examples = new ArrayList<String>();
         examples.add("this is great!");
         examples.add("this is awful!");
-        List<Map<Language, Double>> results = test.language(examples).getLanguage();
+        List<Map<Language, Double>> results = test.language.predict(examples).getLanguage();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).size() == Language.values().length);
     }
@@ -146,7 +147,7 @@ public class ApiTest {
     @Test
     public void testBatchLanguageArray() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        List<Map<Language, Double>> results = test.language(new String[]{"this is great!", "this is awful!"}).getLanguage();
+        List<Map<Language, Double>> results = test.language.predict(new String[]{"this is great!", "this is awful!"}).getLanguage();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).size() == Language.values().length);
     }
@@ -154,7 +155,7 @@ public class ApiTest {
     @Test
     public void testTextTags() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        assertTrue(test.textTags("test").getTextTags().size() == TextTag.values().length);
+        assertTrue(test.textTags.predict("test").getTextTags().size() == TextTag.values().length);
     }
 
     @Test
@@ -163,7 +164,7 @@ public class ApiTest {
         List<String> examples = new ArrayList<String>();
         examples.add("this is great!");
         examples.add("this is awful!");
-        List<Map<TextTag, Double>> results = test.textTags(examples).getTextTags();
+        List<Map<TextTag, Double>> results = test.textTags.predict(examples).getTextTags();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).size() == TextTag.values().length);
     }
@@ -171,7 +172,7 @@ public class ApiTest {
     @Test
     public void testBatchTextTagArray() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
-        List<Map<TextTag, Double>> results = test.textTags(new String[]{"this is great!", "this is awful!"}).getTextTags();
+        List<Map<TextTag, Double>> results = test.textTags.predict(new String[]{"this is great!", "this is awful!"}).getTextTags();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).size() == TextTag.values().length);
     }
@@ -180,7 +181,7 @@ public class ApiTest {
     public void testFER() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
 
-        Map<FacialEmotion, Double> results = test.fer("bin/lena.png").getFer();
+        Map<FacialEmotion, Double> results = test.fer.predict("bin/lena.png").getFer();
         assertTrue(results.size() == FacialEmotion.values().length);
     }
 
@@ -192,7 +193,7 @@ public class ApiTest {
         lenas.add("bin/lena.png");
         lenas.add("bin/lena.png");
 
-        List<Map<FacialEmotion, Double>> results = test.fer(lenas).getFer();
+        List<Map<FacialEmotion, Double>> results = test.fer.predict(lenas).getFer();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
     }
@@ -201,7 +202,7 @@ public class ApiTest {
     public void testImageFeatures() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
 
-        List<Double> results = test.imageFeatures("bin/lena.png").getImageFeatures();
+        List<Double> results = test.imageFeatures.predict("bin/lena.png").getImageFeatures();
         assertTrue(results.size() == 2048);
     }
 
@@ -213,7 +214,7 @@ public class ApiTest {
         lenas.add("bin/lena.png");
         lenas.add("bin/lena.png");
 
-        List<List<Double>> results = test.imageFeatures(lenas).getImageFeatures();
+        List<List<Double>> results = test.imageFeatures.predict(lenas).getImageFeatures();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
     }
@@ -222,7 +223,7 @@ public class ApiTest {
     public void testFacialFeatures() throws IOException, IndicoException {
         indico test = new indico(new File("config.properties"));
 
-        List<Double> results = test.facialFeatures("bin/lena.png").getFacialFeatures();
+        List<Double> results = test.facialFeatures.predict("bin/lena.png").getFacialFeatures();
         assertTrue(results.size() == 48);
     }
 
@@ -234,7 +235,7 @@ public class ApiTest {
         lenas.add("bin/lena.png");
         lenas.add("bin/lena.png");
 
-        List<List<Double>> results = test.facialFeatures(lenas).getFacialFeatures();
+        List<List<Double>> results = test.facialFeatures.predict(lenas).getFacialFeatures();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
     }
@@ -244,9 +245,10 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String example = "this is great!";
-        Api[] apis = {Api.Sentiment, Api.Language};
+        IndicoResult result = test.text.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.Sentiment, Api.Language });
+        }});
 
-        IndicoResult result = test.predictText(example, apis);
         assertTrue(result.getSentiment() > .5);
         assertTrue(result.getLanguage().size() == Language.values().length);
     }
@@ -256,9 +258,10 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String example = "this is going to break!";
-        Api[] apis = {};
 
-        test.predictText(example, apis);
+        test.text.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[0]);
+        }});
     }
 
     @Test(expected = IndicoException.class)
@@ -266,9 +269,11 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String example = "this is going to break!";
-        Api[] apis = {Api.Sentiment, Api.SentimentHQ};
 
-        IndicoResult result = test.predictText(example, apis);
+        IndicoResult result = test.text.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.Sentiment, Api.SentimentHQ });
+        }});
+
         assertTrue(result.getLanguage() == null);
     }
 
@@ -277,9 +282,11 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String example = "bin/lena.png";
-        Api[] apis = {Api.FER, Api.FacialFeatures};
 
-        IndicoResult result = test.predictImage(example, apis);
+        IndicoResult result = test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
+        }});
+
         assertTrue(result.getFacialFeatures().size() == 48);
         assertTrue(result.getFer().size() == FacialEmotion.values().length);
     }
@@ -289,9 +296,10 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String example = "bin/lena.png";
-        Api[] apis = {};
 
-        test.predictImage(example, apis);
+        test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[0]);
+        }});
     }
 
     @Test(expected = IndicoException.class)
@@ -299,9 +307,10 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String example = "bin/lena.png";
-        Api[] apis = {Api.Sentiment};
 
-        test.predictImage(example, apis);
+        test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.Sentiment });
+        }});
     }
 
     @Test(expected = IndicoException.class)
@@ -309,9 +318,11 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String example = "bin/lena.png";
-        Api[] apis = {Api.FER, Api.FacialFeatures};
 
-        IndicoResult result = test.predictImage(example, apis);
+        IndicoResult result = test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
+        }});
+
         assertTrue(result.getImageFeatures() == null);
     }
 
@@ -321,9 +332,11 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String[] example = {"this is great!", "this is terrible!"};
-        Api[] apis = {Api.Sentiment, Api.Language};
 
-        BatchIndicoResult result = test.predictText(example, apis);
+        BatchIndicoResult result = test.text.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.Sentiment, Api.Language });
+        }});
+
         assertTrue(result.getSentiment().get(0) > .5);
         assertTrue(result.getSentiment().get(1) < .5);
         assertTrue(result.getLanguage().size() == 2);
@@ -335,9 +348,10 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String[] example = {"this is going to break!", "This is not going to break"};
-        Api[] apis = {};
 
-        test.predictText(example, apis);
+        test.text.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[0]);
+        }});
     }
 
     @Test(expected = IndicoException.class)
@@ -345,9 +359,11 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String[] example = {"this is going to break!", "errr"};
-        Api[] apis = {Api.Sentiment, Api.SentimentHQ};
 
-        BatchIndicoResult result = test.predictText(example, apis);
+        BatchIndicoResult result = test.text.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.Sentiment, Api.SentimentHQ });
+        }});
+
         assertTrue(result.getLanguage() == null);
     }
 
@@ -356,9 +372,11 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String[] example = {"bin/lena.png", "bin/lena.png"};
-        Api[] apis = {Api.FER, Api.FacialFeatures};
 
-        BatchIndicoResult result = test.predictImage(example, apis);
+        BatchIndicoResult result = test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
+        }});
+
         assertTrue(result.getFacialFeatures().get(0).size() == 48);
         assertTrue(result.getFer().size() == 2);
         assertTrue(result.getFacialFeatures().get(0).equals(result.getFacialFeatures().get(1)));
@@ -369,9 +387,10 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String[] example = {"bin/lena.png", "bin/lena.png"};
-        Api[] apis = {};
 
-        test.predictImage(example, apis);
+        test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[0]);
+        }});
     }
 
     @Test(expected = IndicoException.class)
@@ -379,9 +398,10 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String[] example = {"bin/lena.png", "bin/lena.png"};
-        Api[] apis = {Api.Sentiment};
 
-        test.predictImage(example, apis);
+        test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.Sentiment });
+        }});
     }
 
     @Test(expected = IndicoException.class)
@@ -389,9 +409,11 @@ public class ApiTest {
         indico test = new indico(new File("config.properties"));
 
         String[] example = {"bin/lena.png", "bin/lena.png"};
-        Api[] apis = {Api.FER, Api.FacialFeatures};
 
-        BatchIndicoResult result = test.predictImage(example, apis);
+        BatchIndicoResult result = test.image.predict(example, new HashMap<String, Object>() {{
+            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
+        }});
+
         assertTrue(result.getImageFeatures() == null);
     }
 }

@@ -54,20 +54,20 @@ public class ApiClient {
         this(PUBLIC_BASE_URL, apiKey, privateCloud);
     }
 
-    public IndicoResult call(Api api, BufferedImage data, String type, Map<String, Object> extraParams)
+    IndicoResult call(Api api, BufferedImage data, String type, Map<String, Object> extraParams)
             throws UnsupportedOperationException, IOException, IndicoException {
         return call(api, ImageUtils.encodeImage(data, type), extraParams);
     }
 
     @SuppressWarnings("unchecked")
-    public IndicoResult call(Api api, String data, Map<String, Object> extraParams)
+    IndicoResult call(Api api, String data, Map<String, Object> extraParams)
             throws UnsupportedOperationException, IOException, IndicoException {
 
-        Map<String, ?> apiResponse = baseCall(api.name, data, extraParams);
+        Map<String, ?> apiResponse = baseCall(api, data, extraParams);
         return new IndicoResult(api, apiResponse);
     }
 
-    public BatchIndicoResult call(Api api, List<BufferedImage> data, String type, Map<String, Object> extraParams)
+    BatchIndicoResult call(Api api, List<BufferedImage> data, String type, Map<String, Object> extraParams)
             throws UnsupportedOperationException, IOException, IndicoException {
         List<String> batchedData = new ArrayList<>(data.size());
         for (BufferedImage image : data)
@@ -75,14 +75,14 @@ public class ApiClient {
         return call(api, batchedData, extraParams);
     }
 
-    public BatchIndicoResult call(Api api, List<String> data, Map<String, Object> extraParams)
+    BatchIndicoResult call(Api api, List<String> data, Map<String, Object> extraParams)
             throws UnsupportedOperationException, IOException, IndicoException {
 
-        Map<String, List<?>> apiResponse = baseCall(api.name, data, extraParams);
+        Map<String, List<?>> apiResponse = baseCall(api, data, extraParams);
         return new BatchIndicoResult(api, apiResponse);
     }
 
-    public BatchIndicoResult call(Api api, Map<BufferedImage, String> data, Map<String, Object> extraParams)
+    BatchIndicoResult call(Api api, Map<BufferedImage, String> data, Map<String, Object> extraParams)
             throws UnsupportedOperationException, IOException, IndicoException {
         List<String> batchedData = new ArrayList<>(data.size());
         for (Map.Entry<BufferedImage, String> entry : data.entrySet())
@@ -92,7 +92,8 @@ public class ApiClient {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, ?> baseCall(String api, String data, Map<String, Object> extraParams) throws UnsupportedOperationException, IOException {
+    private Map<String, ?> baseCall(Api api, String data, Map<String, Object> extraParams)
+            throws UnsupportedOperationException, IOException, IndicoException {
         HttpResponse response = httpClient.execute(getBasePost(api, data, extraParams, false));
         HttpEntity entity = response.getEntity();
 
@@ -115,7 +116,8 @@ public class ApiClient {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, List<?>> baseCall(String api, List<String> data, Map<String, Object> extraParams) throws IOException {
+    private Map<String, List<?>> baseCall(Api api, List<String> data, Map<String, Object> extraParams)
+            throws IOException, IndicoException {
         HttpResponse response = httpClient.execute(getBasePost(api, data, extraParams, true));
         HttpEntity entity = response.getEntity();
 
@@ -132,18 +134,9 @@ public class ApiClient {
         return apiResponse;
     }
 
-    private HttpPost getBasePost(String api, Object data, Map<String, Object> extraParams, boolean batch) throws UnsupportedEncodingException {
-        String url = String.format(batch ? batchEndpoint : baseEndpoint, api);
-        if (Objects.equals(api, Api.MultiImage.name)) {
-            StringBuilder builder = new StringBuilder(url);
-            builder.append("&apis=");
-            for (Api each : (Api[]) extraParams.get("apis")) {
-                builder.append(each.toString()).append(",");
-            }
-
-            extraParams.remove("apis");
-            url = builder.substring(0, builder.length() - 1);
-        }
+    private HttpPost getBasePost(Api api, Object data, Map<String, Object> extraParams, boolean batch)
+            throws UnsupportedEncodingException, IndicoException {
+        String url = String.format(batch ? batchEndpoint : baseEndpoint, api) + addUrlParams(api, extraParams);
 
         HttpPost basePost = new HttpPost(url);
 
@@ -162,5 +155,26 @@ public class ApiClient {
         basePost.addHeader("client-lib", "1.4");
 
         return basePost;
+    }
+
+    private String addUrlParams(Api api, Map<String, Object> extraParams) throws IndicoException {
+        StringBuilder builder = new StringBuilder();
+        if (api == Api.MultiImage || api == Api.MultiText) {
+            if (!extraParams.containsKey("apis"))
+                throw new IndicoException("Apis argument for predictImage cannot be empty");
+            Api[] apis = (Api[]) extraParams.get("apis");
+            if (apis.length == 0)
+                throw new IndicoException("Apis argument for predictImage cannot be empty");
+            builder.append("&apis=");
+            for (Api each : apis) {
+                if (api.isImage() != each.isImage())
+                    throw new IndicoException(api.name() + "is not an " + api.type + "Api");
+                builder.append(each.getName()).append(",");
+            }
+
+            extraParams.remove("apis");
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        return builder.toString();
     }
 }

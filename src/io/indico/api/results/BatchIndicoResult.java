@@ -24,13 +24,16 @@ public class BatchIndicoResult {
         if (api.getResults() == null)
             results.put(api, (List<?>) response.get("results"));
         else {
+            if (response.containsKey("error")) {
+                throw new IndicoException(api.name + " failed with error " + response.get("error"));
+            }
             Map<String, ?> responses = (Map<String, ?>) response.get("results");
             for (Api res : api.results) {
-                Map<String, ?> apiResponse = (Map<String, ?>) responses.get(res.name);
-                if (apiResponse == null)
+                if (!responses.containsKey(res.name))
                     continue;
+                Map<String, ?> apiResponse = (Map<String, ?>) responses.get(res.name);
                 if (apiResponse.containsKey("error"))
-                    throw new IndicoException(api.name + " failed with error " + apiResponse.get("error"));
+                    throw new IndicoException(res.name + " failed with error " + apiResponse.get("error"));
                 results.put(res, (List<?>) apiResponse.get("results"));
             }
         }
