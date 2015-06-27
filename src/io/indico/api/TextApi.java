@@ -15,11 +15,6 @@ import io.indico.api.utils.IndicoException;
 public class TextApi extends ApiClient{
     Api api;
 
-    public TextApi(Api api, String apiKey) {
-        super(apiKey);
-        this.api = api;
-    }
-
     public TextApi(Api api, String apiKey, String privateCloud) {
         super(apiKey, privateCloud);
         this.api = api;
