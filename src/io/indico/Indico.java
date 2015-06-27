@@ -49,20 +49,6 @@ public class Indico {
         this.initializeClients();
     }
 
-    public void createPropertiesFile() throws IOException {
-        Properties prop = new Properties();
-        OutputStream output = null;
-
-        output = new FileOutputStream("config.properties");
-        prop.setProperty("apiKey", this.apiKey);
-        if (this.cloud != null) {
-            prop.setProperty("privateCloud", this.cloud);
-        }
-        prop.store(output, null);
-
-        output.close();
-    }
-
     public void createPropertiesFile(String filePath) throws IOException {
         Properties prop = new Properties();
         OutputStream output = null;
