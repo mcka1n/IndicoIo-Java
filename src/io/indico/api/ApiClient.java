@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-
 import io.indico.api.results.BatchIndicoResult;
 import io.indico.api.results.IndicoResult;
 import io.indico.api.utils.ImageUtils;
@@ -35,21 +33,6 @@ public class ApiClient {
     public String baseEndpoint;
     public String batchEndpoint;
 
-    private ApiClient(String baseUrl, String apiKey, String privateCloud) {
-        if (apiKey == null) {
-            throw new IllegalArgumentException("Private Cloud cannot be null");
-        }
-
-        this.baseUrl = privateCloud == null ?
-                baseUrl : "https://" + privateCloud + ".indico.domains";
-        this.baseEndpoint = this.baseUrl + "/%1$2s?key=" + apiKey;
-        this.batchEndpoint = this.baseUrl + "/%1$2s/batch" + "?key=" + apiKey;
-    }
-
-    public ApiClient(String apiKey) {
-        this(PUBLIC_BASE_URL, apiKey, null);
-    }
-
     public ApiClient(String apiKey, String privateCloud) {
         this(PUBLIC_BASE_URL, apiKey, privateCloud);
     }
@@ -59,7 +42,6 @@ public class ApiClient {
         return call(api, ImageUtils.encodeImage(data, type), extraParams);
     }
 
-    @SuppressWarnings("unchecked")
     IndicoResult call(Api api, String data, Map<String, Object> extraParams)
             throws UnsupportedOperationException, IOException, IndicoException {
 
@@ -80,15 +62,6 @@ public class ApiClient {
 
         Map<String, List<?>> apiResponse = baseCall(api, data, extraParams);
         return new BatchIndicoResult(api, apiResponse);
-    }
-
-    BatchIndicoResult call(Api api, Map<BufferedImage, String> data, Map<String, Object> extraParams)
-            throws UnsupportedOperationException, IOException, IndicoException {
-        List<String> batchedData = new ArrayList<>(data.size());
-        for (Map.Entry<BufferedImage, String> entry : data.entrySet())
-            batchedData.add(ImageUtils.encodeImage(entry.getKey(), entry.getValue()));
-
-        return call(api, batchedData, extraParams);
     }
 
     @SuppressWarnings("unchecked")
@@ -176,5 +149,16 @@ public class ApiClient {
             builder.deleteCharAt(builder.length() - 1);
         }
         return builder.toString();
+    }
+
+    private ApiClient(String baseUrl, String apiKey, String privateCloud) {
+        if (apiKey == null) {
+            throw new IllegalArgumentException("API key cannot be null");
+        }
+
+        this.baseUrl = privateCloud == null ?
+                baseUrl : "https://" + privateCloud + ".indico.domains";
+        this.baseEndpoint = this.baseUrl + "/%1$2s?key=" + apiKey;
+        this.batchEndpoint = this.baseUrl + "/%1$2s/batch" + "?key=" + apiKey;
     }
 }

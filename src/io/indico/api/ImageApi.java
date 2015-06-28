@@ -18,11 +18,6 @@ import io.indico.api.utils.IndicoException;
 public class ImageApi extends ApiClient{
     Api api;
 
-    public ImageApi(Api api, String apiKey) {
-        super(apiKey);
-        this.api = api;
-    }
-
     public ImageApi(Api api, String apiKey, String privateCloud) {
         super(apiKey, privateCloud);
         this.api = api;

@@ -12,26 +12,26 @@ import io.indico.api.Api;
 import io.indico.api.ImageApi;
 import io.indico.api.TextApi;
 
-public class indico {
+public class Indico {
 
     public TextApi sentiment, sentimentHQ, political, language, textTags, text;
     public ImageApi fer, facialFeatures, imageFeatures, image;
     public String apiKey;
     public String cloud;
 
-    public indico(String apiKey) {
+    public Indico(String apiKey) {
         this.apiKey = apiKey;
         this.initializeClients();
     }
 
-    public indico(String apiKey, String privateCloud) {
+    public Indico(String apiKey, String privateCloud) {
         this.apiKey = apiKey;
         this.cloud = privateCloud;
 
         this.initializeClients();
     }
 
-    public indico(File configurationFile) throws IOException {
+    public Indico(File configurationFile) throws IOException {
         Properties prop = new Properties();
         InputStream input = new FileInputStream(configurationFile);
         prop.load(input);
@@ -42,25 +42,11 @@ public class indico {
         this.initializeClients();
     }
 
-    public indico() throws IOException {
+    public Indico() throws IOException {
         this.apiKey = System.getenv("INDICO_API_KEY");
         this.cloud = System.getenv("INDICO_CLOUD");
 
         this.initializeClients();
-    }
-
-    public void createPropertiesFile() throws IOException {
-        Properties prop = new Properties();
-        OutputStream output = null;
-
-        output = new FileOutputStream("config.properties");
-        prop.setProperty("apiKey", this.apiKey);
-        if (this.cloud != null) {
-            prop.setProperty("privateCloud", this.cloud);
-        }
-        prop.store(output, null);
-
-        output.close();
     }
 
     public void createPropertiesFile(String filePath) throws IOException {
@@ -90,4 +76,5 @@ public class indico {
         this.imageFeatures = new ImageApi(Api.ImageFeatures, this.apiKey, this.cloud);
         this.image = new ImageApi(Api.MultiImage, this.apiKey, this.cloud);
     }
+
 }
