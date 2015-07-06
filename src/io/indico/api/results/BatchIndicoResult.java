@@ -1,7 +1,13 @@
 package io.indico.api.results;
 
+import java.awt.Point;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import io.indico.api.Api;
@@ -79,6 +85,29 @@ public class BatchIndicoResult {
         if (!results.containsKey(Api.FER))
             throw new IndicoException(Api.FER.name + " was not included in the request");
         return EnumParser.fernum((List<Map<String, Double>>) results.get(Api.FER));
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<Point, Map<FacialEmotion, Double>>> getLocalizedFer() throws IndicoException {
+        List<Map<Point, Map<FacialEmotion, Double>>> ret = new ArrayList<>();
+
+        if (!results.containsKey(Api.FER))
+            throw new IndicoException(Api.FER.name +  " was not included in the request");
+        try {
+            List<List<Map<String, Object>>> result = (List<List<Map<String, Object>>>) results.get(Api.FER);
+            for (List<Map<String, Object>> res : result) {
+                Map<Point, Map<FacialEmotion, Double>> parsed = new HashMap<>();
+                for (Map<String, Object> each : res) {
+                    int[] point = (int[]) each.get("location");
+                    parsed.put(new Point(point[0], point[1]), EnumParser.fernum((Map<String, Double>) each.get("emotions")));
+                }
+                ret.add(parsed);
+            }
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
     }
 
     @SuppressWarnings("unchecked")

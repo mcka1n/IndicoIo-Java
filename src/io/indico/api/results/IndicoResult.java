@@ -1,5 +1,7 @@
 package io.indico.api.results;
 
+import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +76,25 @@ public class IndicoResult {
         if (!results.containsKey(Api.FER))
             throw new IndicoException(Api.FER.name + " was not included in the request");
         return EnumParser.fernum((Map<String, Double>) results.get(Api.FER));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<Point, Map<FacialEmotion, Double>> getLocalizedFer() throws IndicoException {
+        Map<Point, Map<FacialEmotion, Double>> ret = new HashMap<>();
+
+        if (!results.containsKey(Api.FER))
+            throw new IndicoException(Api.FER.name +  " was not included in the request");
+        try {
+            List<Map<String, Object>> result = (List<Map<String, Object>>) results.get(Api.FER);
+            for (Map<String, Object> res : result) {
+                int[] point = (int[]) res.get("location");
+                ret.put(new Point(point[0], point[1]), EnumParser.fernum((Map<String, Double>) res.get("emotions")));
+            }
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
     }
 
     @SuppressWarnings("unchecked")

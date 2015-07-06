@@ -2,6 +2,7 @@ package io.indico.test;
 
 import org.junit.Test;
 
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -216,6 +217,32 @@ public class TestApiSuccess {
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
     }
+
+    @Test
+    public void testFerLocalized() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String lena = "bin/lena.png";
+
+        Map<Point, Map<FacialEmotion, Double>> results = test.fer.predict(lena, new HashMap<String, Object>() {{
+            put("detect", true);
+        }}).getLocalizedFer();
+
+        assertTrue(results.size() == 1);
+    }
+
+    @Test
+    public void testBatchFerLocalized() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String[] lenas = {"bin/lena.png", "bin/lena.png"};
+
+        List<Map<Point, Map<FacialEmotion, Double>>> results = test.fer.predict(lenas, new HashMap<String, Object>() {{
+            put("detect", true);
+        }}).getLocalizedFer();
+        assertTrue(results.size() == 2);
+        assertTrue(results.get(0).equals(results.get(1)));
+    }
     
     @Test
     public void testBatchFERFileArray() throws IOException, IndicoException {
@@ -295,11 +322,12 @@ public class TestApiSuccess {
 
         IndicoResult result = test.image.predict(example, new HashMap<String, Object>() {
 
-			private static final long serialVersionUID = 6393826713020433012L;
+            private static final long serialVersionUID = 6393826713020433012L;
 
-		{
-            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
-        }});
+            {
+                put("apis", new Api[]{Api.FER, Api.FacialFeatures});
+            }
+        });
 
         assertTrue(result.getFacialFeatures().size() == 48);
         assertTrue(result.getFer().size() == FacialEmotion.values().length);
@@ -313,11 +341,12 @@ public class TestApiSuccess {
 
         IndicoResult result = test.image.predict(example, new HashMap<String, Object>() {
 
-			private static final long serialVersionUID = 6393826713020433012L;
+            private static final long serialVersionUID = 6393826713020433012L;
 
-		{
-            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
-        }});
+            {
+                put("apis", new Api[]{Api.FER, Api.FacialFeatures});
+            }
+        });
 
         assertTrue(result.getFacialFeatures().size() == 48);
         assertTrue(result.getFer().size() == FacialEmotion.values().length);
