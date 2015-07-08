@@ -10,6 +10,7 @@ public enum Api {
     Political("political"),
     Language("language"),
     TextTags("texttags"),
+    NamedEntities("namedentities"),
     MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags),
 
     // IMAGE APIS

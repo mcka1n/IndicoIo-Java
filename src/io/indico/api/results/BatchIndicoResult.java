@@ -1,11 +1,13 @@
 package io.indico.api.results;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
+import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
@@ -57,28 +59,52 @@ public class BatchIndicoResult {
     public List<Map<PoliticalClass, Double>> getPolitical() throws IndicoException {
         if (!results.containsKey(Api.Political))
             throw new IndicoException(Api.Political.name + " was not included in the request");
-        return EnumParser.politinum((List<Map<String, Double>>) results.get(Api.Political));
+        return EnumParser.parse(PoliticalClass.class, ((List<Map<String, Double>>) results.get(Api.Political)));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<Language, Double>> getLanguage() throws IndicoException {
         if (!results.containsKey(Api.Language))
             throw new IndicoException(Api.Language.name + " was not included in the request");
-        return EnumParser.langnum((List<Map<String, Double>>) results.get(Api.Language));
+        return EnumParser.parse(Language.class, ((List<Map<String, Double>>) results.get(Api.Language)));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<TextTag, Double>> getTextTags() throws IndicoException {
         if (!results.containsKey(Api.TextTags))
             throw new IndicoException(Api.TextTags.name + " was not included in the request");
-        return EnumParser.tagnum((List<Map<String, Double>>) results.get(Api.TextTags));
+        return EnumParser.parse(TextTag.class, ((List<Map<String, Double>>) results.get(Api.TextTags)));
     }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Map<Category, Double>>> getNamedEntities() throws IndicoException {
+        if (!results.containsKey(Api.NamedEntities))
+            throw new IndicoException(Api.NamedEntities.name + " was not included in the request");
+
+        List<Map<String, Map<Category, Double>>> result = new ArrayList<>();
+
+        List<Map<String, Map<String, Object>>> responses = (List<Map<String, Map<String, Object>>>) results.get(Api.NamedEntities);
+        for (Map<String, Map<String, Object>> response : responses) {
+            Map<String, Map<Category, Double>> each = new HashMap<>();
+            for (Map.Entry<String, Map<String, Object>> entry : response.entrySet()) {
+                Map<String, Double> res = new HashMap<>();
+
+                res.putAll((Map<String, Double>) entry.getValue().remove("categories"));
+                res.put("confidence", (Double) entry.getValue().get("confidence"));
+                each.put(entry.getKey(), EnumParser.parse(Category.class, res));
+            }
+            result.add(each);
+        }
+
+        return result;
+    }
+
 
     @SuppressWarnings("unchecked")
     public List<Map<FacialEmotion, Double>> getFer() throws IndicoException {
         if (!results.containsKey(Api.FER))
             throw new IndicoException(Api.FER.name + " was not included in the request");
-        return EnumParser.fernum((List<Map<String, Double>>) results.get(Api.FER));
+        return EnumParser.parse(FacialEmotion.class, ((List<Map<String, Double>>) results.get(Api.FER)));
     }
 
     @SuppressWarnings("unchecked")

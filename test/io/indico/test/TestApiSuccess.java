@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,12 +19,14 @@ import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
 import io.indico.api.results.BatchIndicoResult;
 import io.indico.api.results.IndicoResult;
+import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
 import io.indico.api.utils.IndicoException;
 import io.indico.Indico;
 
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class TestApiSuccess {
@@ -146,6 +149,33 @@ public class TestApiSuccess {
     public void testTextTags() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
         assertTrue(test.textTags.predict("test").getTextTags().size() == TextTag.values().length);
+    }
+
+    @Test
+    public void testNamedEntities() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+        Map<String, Map<Category, Double>> result = test.namedEntities.predict(
+            "Indico Data Solutions is the best startup in Boston, Massachusetts."
+        ).getNamedEntities();
+
+        for (Map.Entry<String, Map<Category, Double>> entry : result.entrySet()) {
+            assertTrue(entry.getValue().keySet().containsAll(Arrays.asList(Category.values())));
+        }
+    }
+
+    @Test
+    public void testBatchNamedEntities() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+
+        List<Map<String, Map<Category, Double>>> results = test.namedEntities.predict(new String[] {
+            "Indico Data Solutions is the best startup in Boston, Massachusetts."
+           ,"Indico Data Solutions is the best startup in Boston, Massachusetts."
+        }).getNamedEntities();
+
+        assertTrue(results.size() == 2);
+        for (Map.Entry<String, Map<Category, Double>> entry : results.get(0).entrySet()) {
+            assertTrue(entry.getValue().keySet().containsAll(Arrays.asList(Category.values())));
+        }
     }
 
     @Test

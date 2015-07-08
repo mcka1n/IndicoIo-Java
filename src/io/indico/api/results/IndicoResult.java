@@ -6,6 +6,7 @@ import java.util.Map;
 
 import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
+import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
@@ -52,28 +53,46 @@ public class IndicoResult {
     public Map<PoliticalClass, Double> getPolitical() throws IndicoException {
         if (!results.containsKey(Api.Political))
             throw new IndicoException(Api.Political.name + " was not included in the request");
-        return EnumParser.politinum((Map<String, Double>) results.get(Api.Political));
+        return EnumParser.parse(PoliticalClass.class, (Map<String, Double>) results.get(Api.Political));
     }
 
     @SuppressWarnings("unchecked")
     public Map<Language, Double> getLanguage() throws IndicoException {
         if (!results.containsKey(Api.Language))
             throw new IndicoException(Api.Language.name + " was not included in the request");
-        return EnumParser.langnum((Map<String, Double>) results.get(Api.Language));
+        return EnumParser.parse(Language.class, (Map<String, Double>) results.get(Api.Language));
     }
 
     @SuppressWarnings("unchecked")
     public Map<TextTag, Double> getTextTags() throws IndicoException {
         if (!results.containsKey(Api.TextTags))
             throw new IndicoException(Api.TextTags.name + " was not included in the request");
-        return EnumParser.tagnum((Map<String, Double>) results.get(Api.TextTags));
+        return EnumParser.parse(TextTag.class, (Map < String, Double >)results.get(Api.TextTags));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Map<Category, Double>> getNamedEntities() throws IndicoException {
+        if (!results.containsKey(Api.NamedEntities))
+            throw new IndicoException(Api.NamedEntities.name + " was not included in the request");
+
+        Map<String, Map<Category, Double>> result = new HashMap<>();
+        Map<String, Map<String, Object>> response = (Map<String, Map<String, Object>>) results.get(Api.NamedEntities);
+        for (Map.Entry<String, Map<String, Object>> entry : response.entrySet()) {
+            Map<String, Double> res = new HashMap<>();
+
+            res.putAll((Map<String, Double>) entry.getValue().remove("categories"));
+            res.put("confidence", (Double) entry.getValue().get("confidence"));
+            result.put(entry.getKey(), EnumParser.parse(Category.class, res));
+        }
+
+        return result;
     }
 
     @SuppressWarnings("unchecked")
     public Map<FacialEmotion, Double> getFer() throws IndicoException {
         if (!results.containsKey(Api.FER))
             throw new IndicoException(Api.FER.name + " was not included in the request");
-        return EnumParser.fernum((Map<String, Double>) results.get(Api.FER));
+        return EnumParser.parse(FacialEmotion.class, (Map < String, Double >)results.get(Api.FER));
     }
 
     @SuppressWarnings("unchecked")
