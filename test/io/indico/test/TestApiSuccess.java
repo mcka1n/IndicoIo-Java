@@ -151,7 +151,7 @@ public class TestApiSuccess {
     @Test
     public void testBatchTextTagsList() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
-        List<String> examples = new ArrayList<String>();
+        List<String> examples = new ArrayList<>();
         examples.add("this is great!");
         examples.add("this is awful!");
         List<Map<TextTag, Double>> results = test.textTags.predict(examples).getTextTags();
@@ -379,5 +379,28 @@ public class TestApiSuccess {
         assertTrue(result.getFacialFeatures().get(0).size() == 48);
         assertTrue(result.getFer().size() == 2);
         assertTrue(result.getFacialFeatures().get(0).equals(result.getFacialFeatures().get(1)));
+    }
+
+    @Test
+    public void testContentFilteringImageFile() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File example = new File("bin/lena.png");
+
+        IndicoResult result = test.contentFiltering.predict(example);
+
+        assertTrue(result.getContentFiltering() < .5);
+    }
+
+    @Test
+    public void testContentFilteringBatchImageFile() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File[] example = {new File("bin/lena.png"), new File("bin/lena.png")};
+
+        BatchIndicoResult result = test.contentFiltering.predict(example);
+
+        assertTrue(result.getContentFiltering().size() == 2);
+        assertTrue(result.getContentFiltering().get(0).equals(result.getContentFiltering().get(1)));
     }
 }

@@ -15,7 +15,7 @@ import io.indico.api.TextApi;
 public class Indico {
 
     public TextApi sentiment, sentimentHQ, political, language, textTags, text;
-    public ImageApi fer, facialFeatures, imageFeatures, image;
+    public ImageApi fer, facialFeatures, imageFeatures, contentFiltering, image;
     public String apiKey;
     public String cloud;
 
@@ -74,6 +74,7 @@ public class Indico {
         this.fer = new ImageApi(Api.FER, this.apiKey, this.cloud);
         this.facialFeatures = new ImageApi(Api.FacialFeatures, this.apiKey, this.cloud);
         this.imageFeatures = new ImageApi(Api.ImageFeatures, this.apiKey, this.cloud);
+        this.contentFiltering = new ImageApi(Api.ContentFiltering, this.apiKey, this.cloud);
         this.image = new ImageApi(Api.MultiImage, this.apiKey, this.cloud);
     }
 

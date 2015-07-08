@@ -89,4 +89,11 @@ public class IndicoResult {
             throw new IndicoException(Api.FacialFeatures.name + " was not included in the request");
         return (List<Double>) results.get(Api.FacialFeatures);
     }
+
+    @SuppressWarnings("unchecked")
+    public Double getContentFiltering() throws IndicoException {
+        if (!results.containsKey(Api.ContentFiltering))
+            throw new IndicoException(Api.ContentFiltering.name + " was not included in the request");
+        return (Double) results.get(Api.ContentFiltering);
+    }
 }
