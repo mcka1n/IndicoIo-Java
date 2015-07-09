@@ -1,5 +1,9 @@
 package io.indico.api;
 
+import java.security.Key;
+
+import sun.security.krb5.internal.KdcErrException;
+
 /**
  * Created by Chris on 6/22/15.
  */
@@ -10,7 +14,8 @@ public enum Api {
     Political("political"),
     Language("language"),
     TextTags("texttags"),
-    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags),
+    Keywords("keywords"),
+    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords),
 
     // IMAGE APIS
     FER("fer", true, 48),
