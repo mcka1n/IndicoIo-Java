@@ -78,6 +78,11 @@ public class IndicoResult {
         return (Map<String, Double>) get(Api.Keywords);
     }
 
+    @SuppressWarnings("unchecked")
+    public Double getNudityDetection() throws IndicoException {
+        return (Double) get(Api.NudityDetection);
+    }
+
     private Object get(Api name) throws IndicoException{
         if (!results.containsKey(name))
             throw new IndicoException(name.name + " was not included in the request");

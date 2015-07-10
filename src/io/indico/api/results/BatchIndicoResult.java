@@ -84,6 +84,11 @@ public class BatchIndicoResult {
         return (List<Map<String, Double>>) get(Api.Keywords);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<Double> getNudityDetection() throws IndicoException {
+        return (List<Double>) get(Api.NudityDetection);
+    }
+
     private List<?> get(Api name) throws IndicoException{
         if (!results.containsKey(name))
             throw new IndicoException(name.name + " was not included in the request");

@@ -21,6 +21,7 @@ public enum Api {
     FER("fer", true, 48),
     ImageFeatures("imagefeatures", true, 64),
     FacialFeatures("facialfeatures", true, 64),
+    NudityDetection("nuditydetection", true, 128),
     MultiImage("apis", true, 48, FER, ImageFeatures, FacialFeatures);
 
     public String name;

@@ -154,7 +154,7 @@ public class TestApiSuccess {
     @Test
     public void testBatchTextTagsList() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
-        List<String> examples = new ArrayList<String>();
+        List<String> examples = new ArrayList<>();
         examples.add("this is great!");
         examples.add("this is awful!");
         List<Map<TextTag, Double>> results = test.textTags.predict(examples).getTextTags();
@@ -299,11 +299,12 @@ public class TestApiSuccess {
 
         IndicoResult result = test.image.predict(example, new HashMap<String, Object>() {
 
-			private static final long serialVersionUID = 6393826713020433012L;
+            private static final long serialVersionUID = 6393826713020433012L;
 
-		{
-            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
-        }});
+            {
+                put("apis", new Api[]{Api.FER, Api.FacialFeatures});
+            }
+        });
 
         assertTrue(result.getFacialFeatures().size() == 48);
         assertTrue(result.getFer().size() == FacialEmotion.values().length);
@@ -410,5 +411,28 @@ public class TestApiSuccess {
         assertTrue(result.getFacialFeatures().get(0).size() == 48);
         assertTrue(result.getFer().size() == 2);
         assertTrue(result.getFacialFeatures().get(0).equals(result.getFacialFeatures().get(1)));
+    }
+
+    @Test
+    public void testNudityDetection() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File example = new File("bin/lena.png");
+
+        IndicoResult result = test.nudityDetection.predict(example);
+
+        assertTrue(result.getNudityDetection() < .5);
+    }
+
+    @Test
+    public void testNudityDetectionBatch() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File[] example = {new File("bin/lena.png"), new File("bin/lena.png")};
+
+        BatchIndicoResult result = test.nudityDetection.predict(example);
+
+        assertTrue(result.getNudityDetection().size() == 2);
+        assertTrue(result.getNudityDetection().get(0).equals(result.getNudityDetection().get(1)));
     }
 }
