@@ -43,47 +43,34 @@ public class BatchIndicoResult {
 
     @SuppressWarnings("unchecked")
     public List<Double> getSentiment() throws IndicoException {
-        if (!results.containsKey(Api.Sentiment))
-            throw new IndicoException(Api.Sentiment.name + " was not included in the request");
-        return (List<Double>) results.get(Api.Sentiment);
+        return (List<Double>) get(Api.Sentiment);
     }
 
     @SuppressWarnings("unchecked")
     public List<Double> getSentimentHQ() throws IndicoException {
-        if (!results.containsKey(Api.SentimentHQ))
-            throw new IndicoException(Api.SentimentHQ.name + " was not included in the request");
-        return (List<Double>) results.get(Api.SentimentHQ);
+        return (List<Double>) get(Api.SentimentHQ);
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<PoliticalClass, Double>> getPolitical() throws IndicoException {
-        if (!results.containsKey(Api.Political))
-            throw new IndicoException(Api.Political.name + " was not included in the request");
-        return EnumParser.parse(PoliticalClass.class, ((List<Map<String, Double>>) results.get(Api.Political)));
+        return EnumParser.parse(PoliticalClass.class, ((List<Map<String, Double>>) get(Api.Political)));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<Language, Double>> getLanguage() throws IndicoException {
-        if (!results.containsKey(Api.Language))
-            throw new IndicoException(Api.Language.name + " was not included in the request");
-        return EnumParser.parse(Language.class, ((List<Map<String, Double>>) results.get(Api.Language)));
+        return EnumParser.parse(Language.class, ((List<Map<String, Double>>) get(Api.Language)));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<TextTag, Double>> getTextTags() throws IndicoException {
-        if (!results.containsKey(Api.TextTags))
-            throw new IndicoException(Api.TextTags.name + " was not included in the request");
-        return EnumParser.parse(TextTag.class, ((List<Map<String, Double>>) results.get(Api.TextTags)));
+        return EnumParser.parse(TextTag.class, ((List<Map<String, Double>>) get(Api.TextTags)));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<String, Map<Category, Double>>> getNamedEntities() throws IndicoException {
-        if (!results.containsKey(Api.NamedEntities))
-            throw new IndicoException(Api.NamedEntities.name + " was not included in the request");
-
         List<Map<String, Map<Category, Double>>> result = new ArrayList<>();
 
-        List<Map<String, Map<String, Object>>> responses = (List<Map<String, Map<String, Object>>>) results.get(Api.NamedEntities);
+        List<Map<String, Map<String, Object>>> responses = (List<Map<String, Map<String, Object>>>) get(Api.NamedEntities);
         for (Map<String, Map<String, Object>> response : responses) {
             Map<String, Map<Category, Double>> each = new HashMap<>();
             for (Map.Entry<String, Map<String, Object>> entry : response.entrySet()) {
@@ -102,23 +89,28 @@ public class BatchIndicoResult {
 
     @SuppressWarnings("unchecked")
     public List<Map<FacialEmotion, Double>> getFer() throws IndicoException {
-        if (!results.containsKey(Api.FER))
-            throw new IndicoException(Api.FER.name + " was not included in the request");
-        return EnumParser.parse(FacialEmotion.class, ((List<Map<String, Double>>) results.get(Api.FER)));
+        return EnumParser.parse(FacialEmotion.class, ((List<Map<String, Double>>) get(Api.FER)));
     }
 
     @SuppressWarnings("unchecked")
     public List<List<Double>> getImageFeatures() throws IndicoException {
-        if (!results.containsKey(Api.ImageFeatures))
-            throw new IndicoException(Api.ImageFeatures.name + " was not included in the request");
-        return (List<List<Double>>) results.get(Api.ImageFeatures);
+        return (List<List<Double>>) get(Api.ImageFeatures);
     }
 
     @SuppressWarnings("unchecked")
     public List<List<Double>> getFacialFeatures() throws IndicoException {
-        if (!results.containsKey(Api.FacialFeatures))
-            throw new IndicoException(Api.FacialFeatures.name + " was not included in the request");
-        return (List<List<Double>>) results.get(Api.FacialFeatures);
+        return (List<List<Double>>) get(Api.FacialFeatures);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Double>> getKeywords() throws IndicoException {
+        return (List<Map<String, Double>>) get(Api.Keywords);
+    }
+
+    private List<?> get(Api name) throws IndicoException{
+        if (!results.containsKey(name))
+            throw new IndicoException(name.name + " was not included in the request");
+        return results.get(name);
     }
 }
 

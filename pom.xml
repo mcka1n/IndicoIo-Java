@@ -39,7 +39,7 @@
   </distributionManagement>
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test/io/indico/test</testSourceDirectory>
+    <testSourceDirectory>test/</testSourceDirectory>
     <resources>
       <resource>
         <directory>src</directory>

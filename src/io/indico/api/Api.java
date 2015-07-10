@@ -11,7 +11,8 @@ public enum Api {
     Language("language"),
     TextTags("texttags"),
     NamedEntities("namedentities"),
-    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags),
+    Keywords("keywords"),
+    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities),
 
     // IMAGE APIS
     FER("fer", true, 48),

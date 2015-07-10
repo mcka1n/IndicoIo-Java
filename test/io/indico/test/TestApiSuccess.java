@@ -9,12 +9,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import io.indico.Indico;
 import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
 import io.indico.api.results.BatchIndicoResult;
@@ -24,9 +28,7 @@ import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
 import io.indico.api.utils.IndicoException;
-import io.indico.Indico;
 
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class TestApiSuccess {
@@ -306,12 +308,13 @@ public class TestApiSuccess {
 
         String example = "this is great!";
         IndicoResult result = test.text.predict(example, new HashMap<String, Object>() {
-        
-			private static final long serialVersionUID = 1215210703571708645L;
 
-		{
-            put("apis", new Api[] { Api.Sentiment, Api.Language });
-        }});
+            private static final long serialVersionUID = 1215210703571708645L;
+
+            {
+                put("apis", new Api[]{Api.Sentiment, Api.Language});
+            }
+        });
 
         assertTrue(result.getSentiment() > .5);
         assertTrue(result.getLanguage().size() == Language.values().length);
@@ -351,6 +354,33 @@ public class TestApiSuccess {
 
         assertTrue(result.getFacialFeatures().size() == 48);
         assertTrue(result.getFer().size() == FacialEmotion.values().length);
+    }
+
+    @Test
+    public void testKeywordsApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "Chris was here at Indico Data Solutions";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        IndicoResult result = test.keywords.predict(example);
+        Map<String, Double> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.keySet()));
+    }
+
+    @Test
+    public void testBatchKeywordsApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "Chris was here at Indico Data Solutions";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        BatchIndicoResult result = test.keywords.predict(new String[] {example, example});
+        List<Map<String, Double>> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.get(0).keySet()));
+        assertTrue(words.containsAll(results.get(1).keySet()));
     }
 
     @Test
