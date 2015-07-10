@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>indicoio-java</groupId>
   <artifactId>indicoio-java</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <packaging>jar</packaging>
   <name>indico</name>
   <description>A Java Wrapper for indico. Use pre-built state of the art machine learning algorithms with a single line of code.</description>
@@ -23,9 +23,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</connection>
-    <developerConnection>scm:git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</developerConnection>
-    <url>git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</url>
+    <connection>scm:git:git@github.com:IndicoDataSolutions/indicoio-Java.git</connection>
+    <developerConnection>scm:git:git@github.com:IndicoDataSolutions/indicoio-Java.git</developerConnection>
+    <url>git:git@github.com:IndicoDataSolutions/indicoio-Java.git</url>
   </scm>
   <distributionManagement>
     <snapshotRepository>
@@ -39,7 +39,7 @@
   </distributionManagement>
   <build>
     <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test/io/indico/test</testSourceDirectory>
+    <testSourceDirectory>test/</testSourceDirectory>
     <resources>
       <resource>
         <directory>src</directory>
@@ -148,5 +148,12 @@
   		<artifactId>junit</artifactId>
   		<version>4.12</version>
   	</dependency>
+  <dependency>
+      <groupId>org.imgscalr</groupId>
+      <artifactId>imgscalr-lib</artifactId>
+      <version>4.2</version>
+      <type>jar</type>
+      <scope>compile</scope>
+  </dependency>
   </dependencies>
 </project>

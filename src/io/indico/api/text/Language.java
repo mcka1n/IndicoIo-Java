@@ -33,5 +33,5 @@ public enum Language {
     Slovak,
     Hebrew,
     Polish,
-    Arabic
+    Arabic;
 }

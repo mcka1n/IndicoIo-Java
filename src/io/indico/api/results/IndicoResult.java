@@ -1,11 +1,13 @@
 package io.indico.api.results;
 
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
+import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
@@ -35,58 +37,91 @@ public class IndicoResult {
             }
         }
     }
-
     public Double getSentiment() throws IndicoException {
-        if (!results.containsKey(Api.Sentiment))
-            throw new IndicoException(Api.Sentiment.name + " was not included in the request");
-        return (Double) results.get(Api.Sentiment);
+        return (Double) get(Api.Sentiment);
     }
 
     public Double getSentimentHQ() throws IndicoException {
-        if (!results.containsKey(Api.SentimentHQ))
-            throw new IndicoException(Api.SentimentHQ.name + " was not included in the request");
-        return (Double) results.get(Api.SentimentHQ);
+        return (Double) get(Api.SentimentHQ);
     }
 
     @SuppressWarnings("unchecked")
     public Map<PoliticalClass, Double> getPolitical() throws IndicoException {
-        if (!results.containsKey(Api.Political))
-            throw new IndicoException(Api.Political.name + " was not included in the request");
-        return EnumParser.politinum((Map<String, Double>) results.get(Api.Political));
+        return EnumParser.parse(PoliticalClass.class, (Map<String, Double>) get(Api.Political));
     }
 
     @SuppressWarnings("unchecked")
     public Map<Language, Double> getLanguage() throws IndicoException {
-        if (!results.containsKey(Api.Language))
-            throw new IndicoException(Api.Language.name + " was not included in the request");
-        return EnumParser.langnum((Map<String, Double>) results.get(Api.Language));
+        return EnumParser.parse(Language.class, (Map<String, Double>) get(Api.Language));
     }
 
     @SuppressWarnings("unchecked")
     public Map<TextTag, Double> getTextTags() throws IndicoException {
-        if (!results.containsKey(Api.TextTags))
-            throw new IndicoException(Api.TextTags.name + " was not included in the request");
-        return EnumParser.tagnum((Map<String, Double>) results.get(Api.TextTags));
+        return EnumParser.parse(TextTag.class, (Map <String, Double>)get(Api.TextTags));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Map<Category, Double>> getNamedEntities() throws IndicoException {
+        Map<String, Map<Category, Double>> result = new HashMap<>();
+        Map<String, Map<String, Object>> response = (Map<String, Map<String, Object>>) get(Api.NamedEntities);
+        for (Map.Entry<String, Map<String, Object>> entry : response.entrySet()) {
+            Map<String, Double> res = new HashMap<>();
+
+            res.putAll((Map<String, Double>) entry.getValue().remove("categories"));
+            res.put("confidence", (Double) entry.getValue().get("confidence"));
+            result.put(entry.getKey(), EnumParser.parse(Category.class, res));
+        }
+
+        return result;
     }
 
     @SuppressWarnings("unchecked")
     public Map<FacialEmotion, Double> getFer() throws IndicoException {
-        if (!results.containsKey(Api.FER))
-            throw new IndicoException(Api.FER.name + " was not included in the request");
-        return EnumParser.fernum((Map<String, Double>) results.get(Api.FER));
+        return EnumParser.parse(FacialEmotion.class, (Map<String, Double>) get(Api.FER));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<Point, Map<FacialEmotion, Double>> getLocalizedFer() throws IndicoException {
+        Map<Point, Map<FacialEmotion, Double>> ret = new HashMap<>();
+
+        try {
+            List<Map<String, Object>> result = (List<Map<String, Object>>) get(Api.FER);
+            for (Map<String, Object> res : result) {
+                List<Double> point = (List<Double>) res.get("location");
+                ret.put(new Point(point.get(0).intValue(), point.get(1).intValue()),
+                    EnumParser.parse(FacialEmotion.class, (Map<String, Double>) res.get("emotions"))
+                );
+            }
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
     }
 
     @SuppressWarnings("unchecked")
     public List<Double> getImageFeatures() throws IndicoException {
-        if (!results.containsKey(Api.ImageFeatures))
-            throw new IndicoException(Api.ImageFeatures.name + " was not included in the request");
-        return (List<Double>) results.get(Api.ImageFeatures);
+        return (List<Double>) get(Api.ImageFeatures);
     }
 
     @SuppressWarnings("unchecked")
     public List<Double> getFacialFeatures() throws IndicoException {
-        if (!results.containsKey(Api.FacialFeatures))
-            throw new IndicoException(Api.FacialFeatures.name + " was not included in the request");
-        return (List<Double>) results.get(Api.FacialFeatures);
+        return (List<Double>) get(Api.FacialFeatures);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Double> getKeywords() throws IndicoException {
+        return (Map<String, Double>) get(Api.Keywords);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Double getContentFiltering() throws IndicoException {
+        return (Double) get(Api.ContentFiltering);
+    }
+
+    private Object get(Api name) throws IndicoException{
+        if (!results.containsKey(name))
+            throw new IndicoException(name.name + " was not included in the request");
+        return results.get(name);
     }
 }
