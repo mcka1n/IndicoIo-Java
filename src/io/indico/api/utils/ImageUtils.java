@@ -52,6 +52,10 @@ public class ImageUtils {
     }
 
     public static BufferedImage convertToImage(File imageFile, int size) throws IOException {
+        if (size == -1) {
+            return ImageIO.read(imageFile);
+        }
+
         return Scalr.resize(ImageIO.read(imageFile), size);
     }
 

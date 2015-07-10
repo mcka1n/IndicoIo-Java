@@ -1,5 +1,7 @@
 package io.indico.api;
 
+import java.util.HashMap;
+
 /**
  * Created by Chris on 6/22/15.
  */
@@ -18,7 +20,7 @@ public enum Api {
     FER("fer", true, 48),
     ImageFeatures("imagefeatures", true, 64),
     FacialFeatures("facialfeatures", true, 64),
-    ContentFiltering("contentfiltering", true, 128),
+    ContentFiltering("contentfiltering", true, -1),
     MultiImage("apis", true, 48, FER, ImageFeatures, FacialFeatures, ContentFiltering);
 
     public String name;
@@ -64,7 +66,12 @@ public enum Api {
         return name;
     }
 
-    public int getImageSize() {
+    public int getSize(HashMap<String, Object> params) {
+        if (this == Api.FER
+            && params != null
+            && params.containsKey("detect")
+            && params.get("detect") == true)
+                return -1;
         return size;
     }
 }

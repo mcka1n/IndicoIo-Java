@@ -254,7 +254,7 @@ public class TestApiSuccess {
     public void testFerLocalized() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
 
-        String lena = "bin/lena.png";
+        File lena = new File("bin/lena.png");
 
         Map<Point, Map<FacialEmotion, Double>> results = test.fer.predict(lena, new HashMap<String, Object>() {{
             put("detect", true);
@@ -267,13 +267,12 @@ public class TestApiSuccess {
     public void testBatchFerLocalized() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
 
-        String[] lenas = {"bin/lena.png", "bin/lena.png"};
+        File[] lenas = {new File("bin/lena.png")};
 
         List<Map<Point, Map<FacialEmotion, Double>>> results = test.fer.predict(lenas, new HashMap<String, Object>() {{
             put("detect", true);
         }}).getLocalizedFer();
-        assertTrue(results.size() == 2);
-        assertTrue(results.get(0).equals(results.get(1)));
+        assertTrue(results.size() == 1);
     }
     
     @Test
@@ -320,7 +319,7 @@ public class TestApiSuccess {
     public void testBatchFacialFeatures() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
 
-        List<String> lenas = new ArrayList<String>();
+        List<String> lenas = new ArrayList<>();
         lenas.add("bin/lena.png");
         lenas.add("bin/lena.png");
 
@@ -487,11 +486,10 @@ public class TestApiSuccess {
     public void testContentFilteringBatch() throws IndicoException, IOException {
         Indico test = new Indico(new File("config.properties"));
 
-        File[] example = {new File("bin/lena.png"), new File("bin/lena.png")};
+        File[] example = {new File("bin/lena.png")};
 
         BatchIndicoResult result = test.contentFiltering.predict(example);
 
-        assertTrue(result.getContentFIltering().size() == 2);
-        assertTrue(result.getContentFIltering().get(0).equals(result.getContentFIltering().get(1)));
+        assertTrue(result.getContentFIltering().size() == 1);
     }
 }
