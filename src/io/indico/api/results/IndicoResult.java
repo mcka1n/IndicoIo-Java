@@ -6,6 +6,7 @@ import java.util.Map;
 
 import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
+import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
@@ -45,22 +46,37 @@ public class IndicoResult {
 
     @SuppressWarnings("unchecked")
     public Map<PoliticalClass, Double> getPolitical() throws IndicoException {
-        return EnumParser.politinum((Map<String, Double>) get(Api.Political));
+        return EnumParser.parse(PoliticalClass.class, (Map<String, Double>) get(Api.Political));
     }
 
     @SuppressWarnings("unchecked")
     public Map<Language, Double> getLanguage() throws IndicoException {
-        return EnumParser.langnum((Map<String, Double>) get(Api.Language));
+        return EnumParser.parse(Language.class, (Map<String, Double>) get(Api.Language));
     }
 
     @SuppressWarnings("unchecked")
     public Map<TextTag, Double> getTextTags() throws IndicoException {
-        return EnumParser.tagnum((Map<String, Double>) get(Api.TextTags));
+        return EnumParser.parse(TextTag.class, (Map <String, Double>)get(Api.TextTags));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Map<Category, Double>> getNamedEntities() throws IndicoException {
+        Map<String, Map<Category, Double>> result = new HashMap<>();
+        Map<String, Map<String, Object>> response = (Map<String, Map<String, Object>>) get(Api.NamedEntities);
+        for (Map.Entry<String, Map<String, Object>> entry : response.entrySet()) {
+            Map<String, Double> res = new HashMap<>();
+
+            res.putAll((Map<String, Double>) entry.getValue().remove("categories"));
+            res.put("confidence", (Double) entry.getValue().get("confidence"));
+            result.put(entry.getKey(), EnumParser.parse(Category.class, res));
+        }
+
+        return result;
     }
 
     @SuppressWarnings("unchecked")
     public Map<FacialEmotion, Double> getFer() throws IndicoException {
-        return EnumParser.fernum((Map<String, Double>) get(Api.FER));
+        return EnumParser.parse(FacialEmotion.class, (Map<String, Double>) get(Api.FER));
     }
 
     @SuppressWarnings("unchecked")
@@ -79,8 +95,8 @@ public class IndicoResult {
     }
 
     @SuppressWarnings("unchecked")
-    public Double getNudityDetection() throws IndicoException {
-        return (Double) get(Api.NudityDetection);
+    public Double getContentFiltering() throws IndicoException {
+        return (Double) get(Api.ContentFiltering);
     }
 
     private Object get(Api name) throws IndicoException{

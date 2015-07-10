@@ -1,11 +1,13 @@
 package io.indico.api.results;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
+import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
@@ -51,22 +53,43 @@ public class BatchIndicoResult {
 
     @SuppressWarnings("unchecked")
     public List<Map<PoliticalClass, Double>> getPolitical() throws IndicoException {
-        return EnumParser.politinum((List<Map<String, Double>>) get(Api.Political));
+        return EnumParser.parse(PoliticalClass.class, ((List<Map<String, Double>>) get(Api.Political)));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<Language, Double>> getLanguage() throws IndicoException {
-        return EnumParser.langnum((List<Map<String, Double>>) get(Api.Language));
+        return EnumParser.parse(Language.class, ((List<Map<String, Double>>) get(Api.Language)));
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<TextTag, Double>> getTextTags() throws IndicoException {
-        return EnumParser.tagnum((List<Map<String, Double>>) get(Api.TextTags));
+        return EnumParser.parse(TextTag.class, ((List<Map<String, Double>>) get(Api.TextTags)));
     }
 
     @SuppressWarnings("unchecked")
+    public List<Map<String, Map<Category, Double>>> getNamedEntities() throws IndicoException {
+        List<Map<String, Map<Category, Double>>> result = new ArrayList<>();
+
+        List<Map<String, Map<String, Object>>> responses = (List<Map<String, Map<String, Object>>>) get(Api.NamedEntities);
+        for (Map<String, Map<String, Object>> response : responses) {
+            Map<String, Map<Category, Double>> each = new HashMap<>();
+            for (Map.Entry<String, Map<String, Object>> entry : response.entrySet()) {
+                Map<String, Double> res = new HashMap<>();
+
+                res.putAll((Map<String, Double>) entry.getValue().remove("categories"));
+                res.put("confidence", (Double) entry.getValue().get("confidence"));
+                each.put(entry.getKey(), EnumParser.parse(Category.class, res));
+            }
+            result.add(each);
+        }
+
+        return result;
+    }
+
+
+    @SuppressWarnings("unchecked")
     public List<Map<FacialEmotion, Double>> getFer() throws IndicoException {
-        return EnumParser.fernum((List<Map<String, Double>>) get(Api.FER));
+        return EnumParser.parse(FacialEmotion.class, ((List<Map<String, Double>>) get(Api.FER)));
     }
 
     @SuppressWarnings("unchecked")
@@ -85,8 +108,8 @@ public class BatchIndicoResult {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Double> getNudityDetection() throws IndicoException {
-        return (List<Double>) get(Api.NudityDetection);
+    public List<Double> getContentFIltering() throws IndicoException {
+        return (List<Double>) get(Api.ContentFiltering);
     }
 
     private List<?> get(Api name) throws IndicoException{
