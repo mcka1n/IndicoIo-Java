@@ -23,9 +23,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</connection>
-    <developerConnection>scm:git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</developerConnection>
-    <url>git:git@github.com:IndicoDataSolutions/indicoio-java-central.git</url>
+    <connection>scm:git:git@github.com:IndicoDataSolutions/indicoio-Java.git</connection>
+    <developerConnection>scm:git:git@github.com:IndicoDataSolutions/indicoio-Java.git</developerConnection>
+    <url>git:git@github.com:IndicoDataSolutions/indicoio-Java.git</url>
   </scm>
   <distributionManagement>
     <snapshotRepository>

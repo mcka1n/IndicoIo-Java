@@ -102,8 +102,8 @@ public class BatchIndicoResult {
             for (List<Map<String, Object>> res : result) {
                 Map<Point, Map<FacialEmotion, Double>> parsed = new HashMap<>();
                 for (Map<String, Object> each : res) {
-                    int[] point = (int[]) each.get("location");
-                    parsed.put(new Point(point[0], point[1]), EnumParser.parse(FacialEmotion.class, (Map<String, Double>) each.get("emotions")));
+                    List<Double> point = (List<Double>) each.get("location");
+                    parsed.put(new Point(point.get(0).intValue(), point.get(1).intValue()), EnumParser.parse(FacialEmotion.class, (Map<String, Double>) each.get("emotions")));
                 }
                 ret.add(parsed);
             }

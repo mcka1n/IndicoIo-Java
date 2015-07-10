@@ -87,8 +87,10 @@ public class IndicoResult {
         try {
             List<Map<String, Object>> result = (List<Map<String, Object>>) get(Api.FER);
             for (Map<String, Object> res : result) {
-                int[] point = (int[]) res.get("location");
-                ret.put(new Point(point[0], point[1]), EnumParser.parse(FacialEmotion.class, (Map<String, Double>) res.get("emotions")));
+                List<Double> point = (List<Double>) res.get("location");
+                ret.put(new Point(point.get(0).intValue(), point.get(1).intValue()),
+                    EnumParser.parse(FacialEmotion.class, (Map<String, Double>) res.get("emotions"))
+                );
             }
         } catch (ClassCastException e) {
             e.printStackTrace();
