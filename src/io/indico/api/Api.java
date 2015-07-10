@@ -19,7 +19,7 @@ public enum Api {
     ImageFeatures("imagefeatures", true, 64),
     FacialFeatures("facialfeatures", true, 64),
     ContentFiltering("contentfiltering", true, 128),
-    MultiImage("apis", true, 48, FER, ImageFeatures, FacialFeatures);
+    MultiImage("apis", true, 48, FER, ImageFeatures, FacialFeatures, ContentFiltering);
 
     public String name;
     public String type;

@@ -1,12 +1,10 @@
 package io.indico.test;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-
-import org.junit.Test;
 
 import io.indico.Indico;
 import io.indico.api.Api;

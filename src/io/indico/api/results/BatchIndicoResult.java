@@ -1,5 +1,6 @@
 package io.indico.api.results;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,6 +91,27 @@ public class BatchIndicoResult {
     @SuppressWarnings("unchecked")
     public List<Map<FacialEmotion, Double>> getFer() throws IndicoException {
         return EnumParser.parse(FacialEmotion.class, ((List<Map<String, Double>>) get(Api.FER)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<Point, Map<FacialEmotion, Double>>> getLocalizedFer() throws IndicoException {
+        List<Map<Point, Map<FacialEmotion, Double>>> ret = new ArrayList<>();
+
+        try {
+            List<List<Map<String, Object>>> result = (List<List<Map<String, Object>>>) get(Api.FER);
+            for (List<Map<String, Object>> res : result) {
+                Map<Point, Map<FacialEmotion, Double>> parsed = new HashMap<>();
+                for (Map<String, Object> each : res) {
+                    int[] point = (int[]) each.get("location");
+                    parsed.put(new Point(point[0], point[1]), EnumParser.parse(FacialEmotion.class, (Map<String, Double>) each.get("emotions")));
+                }
+                ret.add(parsed);
+            }
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
     }
 
     @SuppressWarnings("unchecked")

@@ -2,6 +2,7 @@ package io.indico.test;
 
 import org.junit.Test;
 
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -245,6 +246,32 @@ public class TestApiSuccess {
         String[] lenas = {"bin/lena.png", "bin/lena.png"};
 
         List<Map<FacialEmotion, Double>> results = test.fer.predict(lenas).getFer();
+        assertTrue(results.size() == 2);
+        assertTrue(results.get(0).equals(results.get(1)));
+    }
+
+    @Test
+    public void testFerLocalized() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String lena = "bin/lena.png";
+
+        Map<Point, Map<FacialEmotion, Double>> results = test.fer.predict(lena, new HashMap<String, Object>() {{
+            put("detect", true);
+        }}).getLocalizedFer();
+
+        assertTrue(results.size() == 1);
+    }
+
+    @Test
+    public void testBatchFerLocalized() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String[] lenas = {"bin/lena.png", "bin/lena.png"};
+
+        List<Map<Point, Map<FacialEmotion, Double>>> results = test.fer.predict(lenas, new HashMap<String, Object>() {{
+            put("detect", true);
+        }}).getLocalizedFer();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).equals(results.get(1)));
     }

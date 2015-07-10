@@ -1,5 +1,6 @@
 package io.indico.api.results;
 
+import java.awt.Point;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,23 @@ public class IndicoResult {
     @SuppressWarnings("unchecked")
     public Map<FacialEmotion, Double> getFer() throws IndicoException {
         return EnumParser.parse(FacialEmotion.class, (Map<String, Double>) get(Api.FER));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<Point, Map<FacialEmotion, Double>> getLocalizedFer() throws IndicoException {
+        Map<Point, Map<FacialEmotion, Double>> ret = new HashMap<>();
+
+        try {
+            List<Map<String, Object>> result = (List<Map<String, Object>>) get(Api.FER);
+            for (Map<String, Object> res : result) {
+                int[] point = (int[]) res.get("location");
+                ret.put(new Point(point[0], point[1]), EnumParser.parse(FacialEmotion.class, (Map<String, Double>) res.get("emotions")));
+            }
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
     }
 
     @SuppressWarnings("unchecked")
