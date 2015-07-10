@@ -9,21 +9,26 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import io.indico.Indico;
 import io.indico.api.Api;
 import io.indico.api.image.FacialEmotion;
 import io.indico.api.results.BatchIndicoResult;
 import io.indico.api.results.IndicoResult;
+import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
 import io.indico.api.utils.IndicoException;
-import io.indico.Indico;
 
 import static org.junit.Assert.assertTrue;
 
@@ -150,9 +155,36 @@ public class TestApiSuccess {
     }
 
     @Test
+    public void testNamedEntities() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+        Map<String, Map<Category, Double>> result = test.namedEntities.predict(
+            "Indico Data Solutions is the best startup in Boston, Massachusetts."
+        ).getNamedEntities();
+
+        for (Map.Entry<String, Map<Category, Double>> entry : result.entrySet()) {
+            assertTrue(entry.getValue().keySet().containsAll(Arrays.asList(Category.values())));
+        }
+    }
+
+    @Test
+    public void testBatchNamedEntities() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+
+        List<Map<String, Map<Category, Double>>> results = test.namedEntities.predict(new String[] {
+            "Indico Data Solutions is the best startup in Boston, Massachusetts."
+           ,"Indico Data Solutions is the best startup in Boston, Massachusetts."
+        }).getNamedEntities();
+
+        assertTrue(results.size() == 2);
+        for (Map.Entry<String, Map<Category, Double>> entry : results.get(0).entrySet()) {
+            assertTrue(entry.getValue().keySet().containsAll(Arrays.asList(Category.values())));
+        }
+    }
+
+    @Test
     public void testBatchTextTagsList() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
-        List<String> examples = new ArrayList<String>();
+        List<String> examples = new ArrayList<>();
         examples.add("this is great!");
         examples.add("this is awful!");
         List<Map<TextTag, Double>> results = test.textTags.predict(examples).getTextTags();
@@ -303,12 +335,13 @@ public class TestApiSuccess {
 
         String example = "this is great!";
         IndicoResult result = test.text.predict(example, new HashMap<String, Object>() {
-        
-			private static final long serialVersionUID = 1215210703571708645L;
 
-		{
-            put("apis", new Api[] { Api.Sentiment, Api.Language });
-        }});
+            private static final long serialVersionUID = 1215210703571708645L;
+
+            {
+                put("apis", new Api[]{Api.Sentiment, Api.Language});
+            }
+        });
 
         assertTrue(result.getSentiment() > .5);
         assertTrue(result.getLanguage().size() == Language.values().length);
@@ -353,6 +386,33 @@ public class TestApiSuccess {
     }
 
     @Test
+    public void testKeywordsApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "Chris was here at Indico Data Solutions";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        IndicoResult result = test.keywords.predict(example);
+        Map<String, Double> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.keySet()));
+    }
+
+    @Test
+    public void testBatchKeywordsApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "Chris was here at Indico Data Solutions";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        BatchIndicoResult result = test.keywords.predict(new String[] {example, example});
+        List<Map<String, Double>> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.get(0).keySet()));
+        assertTrue(words.containsAll(results.get(1).keySet()));
+    }
+
+    @Test
     public void testBatchPredictText() throws IndicoException, IOException {
         Indico test = new Indico(new File("config.properties"));
 
@@ -360,11 +420,12 @@ public class TestApiSuccess {
 
         BatchIndicoResult result = test.text.predict(example, new HashMap<String, Object>() {
 
-			private static final long serialVersionUID = 4143333107148067384L;
+            private static final long serialVersionUID = 4143333107148067384L;
 
-		{
-            put("apis", new Api[] { Api.Sentiment, Api.Language });
-        }});
+            {
+                put("apis", new Api[]{Api.Sentiment, Api.Language});
+            }
+        });
 
         assertTrue(result.getSentiment().get(0) > .5);
         assertTrue(result.getSentiment().get(1) < .5);
@@ -380,11 +441,12 @@ public class TestApiSuccess {
 
         BatchIndicoResult result = test.image.predict(example, new HashMap<String, Object>() {
 
-			private static final long serialVersionUID = 4325122495271807552L;
+            private static final long serialVersionUID = 4325122495271807552L;
 
-		{
-            put("apis", new Api[] { Api.FER, Api.FacialFeatures });
-        }});
+            {
+                put("apis", new Api[]{Api.FER, Api.FacialFeatures});
+            }
+        });
 
         assertTrue(result.getFacialFeatures().get(0).size() == 48);
         assertTrue(result.getFer().size() == 2);
@@ -408,5 +470,28 @@ public class TestApiSuccess {
         assertTrue(result.getFacialFeatures().get(0).size() == 48);
         assertTrue(result.getFer().size() == 2);
         assertTrue(result.getFacialFeatures().get(0).equals(result.getFacialFeatures().get(1)));
+    }
+
+    @Test
+    public void testContentFiltering() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File example = new File("bin/lena.png");
+
+        IndicoResult result = test.contentFiltering.predict(example);
+
+        assertTrue(result.getContentFiltering() < .5);
+    }
+
+    @Test
+    public void testContentFilteringBatch() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File[] example = {new File("bin/lena.png"), new File("bin/lena.png")};
+
+        BatchIndicoResult result = test.contentFiltering.predict(example);
+
+        assertTrue(result.getContentFIltering().size() == 2);
+        assertTrue(result.getContentFIltering().get(0).equals(result.getContentFIltering().get(1)));
     }
 }

@@ -10,13 +10,16 @@ public enum Api {
     Political("political"),
     Language("language"),
     TextTags("texttags"),
-    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags),
+    NamedEntities("namedentities"),
+    Keywords("keywords"),
+    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities),
 
     // IMAGE APIS
     FER("fer", true, 48),
     ImageFeatures("imagefeatures", true, 64),
     FacialFeatures("facialfeatures", true, 64),
-    MultiImage("apis", true, 48, FER, ImageFeatures, FacialFeatures);
+    ContentFiltering("contentfiltering", true, 128),
+    MultiImage("apis", true, 48, FER, ImageFeatures, FacialFeatures, ContentFiltering);
 
     public String name;
     public String type;
