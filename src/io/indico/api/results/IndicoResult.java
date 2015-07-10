@@ -76,7 +76,7 @@ public class IndicoResult {
 
     @SuppressWarnings("unchecked")
     public Map<FacialEmotion, Double> getFer() throws IndicoException {
-        return EnumParser.parse(FacialEmotion.class, (Map <String, Double>) get(Api.FER));
+        return EnumParser.parse(FacialEmotion.class, (Map<String, Double>) get(Api.FER));
     }
 
     @SuppressWarnings("unchecked")
@@ -92,6 +92,11 @@ public class IndicoResult {
     @SuppressWarnings("unchecked")
     public Map<String, Double> getKeywords() throws IndicoException {
         return (Map<String, Double>) get(Api.Keywords);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Double getContentFiltering() throws IndicoException {
+        return (Double) get(Api.ContentFiltering);
     }
 
     private Object get(Api name) throws IndicoException{
