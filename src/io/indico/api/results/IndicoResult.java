@@ -119,6 +119,11 @@ public class IndicoResult {
         return (Double) get(Api.ContentFiltering);
     }
 
+    @SuppressWarnings("unchecked")
+    public Double getTwitterEngagement() throws IndicoException {
+        return (Double) get(Api.TwitterEngagement);
+    }
+
     private Object get(Api name) throws IndicoException{
         if (!results.containsKey(name))
             throw new IndicoException(name.name + " was not included in the request");
