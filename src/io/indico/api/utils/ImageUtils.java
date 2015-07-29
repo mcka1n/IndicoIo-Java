@@ -35,13 +35,14 @@ public class ImageUtils {
         return imageString;
     }
 
-    public static List<BufferedImage> convertToImage(List<?> images, int size) throws IOException {
+    public static List<BufferedImage> convertToImage(List<?> images, int size, boolean minAxis)
+        throws IOException {
         List<BufferedImage> convertedInput = new ArrayList<>();
         for (Object entry : images) {
             if (entry instanceof File) {
-                convertedInput.add(convertToImage((File) entry, size));
+                convertedInput.add(convertToImage((File) entry, size, minAxis));
             } else if (entry instanceof String) {
-                convertedInput.add(convertToImage((String) entry, size));
+                convertedInput.add(convertToImage((String) entry, size, minAxis));
             } else {
                 throw new IllegalArgumentException(
                         "imageCall method only supports lists of Files and lists of Strings"
@@ -51,16 +52,23 @@ public class ImageUtils {
         return convertedInput;
     }
 
-    public static BufferedImage convertToImage(File imageFile, int size) throws IOException {
+    public static BufferedImage convertToImage(File imageFile, int size, boolean minAxis) throws IOException {
         if (size == -1) {
             return ImageIO.read(imageFile);
         }
 
-        return Scalr.resize(ImageIO.read(imageFile), size);
+        BufferedImage image = ImageIO.read(imageFile);
+
+        double aspect = image.getWidth() / image.getHeight();
+        if (aspect >= 10 || aspect <= .1)
+            System.out.println("WARNING: We we recommend images with aspect ratio less than 1:10");
+
+        Scalr.Mode method = minAxis ? Scalr.Mode.AUTOMATIC : Scalr.Mode.FIT_EXACT;
+        return Scalr.resize(image, method, size);
     }
 
-    public static BufferedImage convertToImage(String filePath, int size) throws IOException {
-        return convertToImage(new File(filePath), size);
+    public static BufferedImage convertToImage(String filePath, int size, boolean minAxis) throws IOException {
+        return convertToImage(new File(filePath), size, minAxis);
     }
 
     public static String grabType(String filePath) throws IOException {
