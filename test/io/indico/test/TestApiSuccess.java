@@ -1,5 +1,6 @@
 package io.indico.test;
 
+import org.imgscalr.Scalr;
 import org.junit.Test;
 
 import java.awt.Point;
@@ -29,8 +30,10 @@ import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
+import io.indico.api.utils.ImageUtils;
 import io.indico.api.utils.IndicoException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestApiSuccess {
@@ -47,6 +50,17 @@ public class TestApiSuccess {
         assertTrue(check.cloud.equals(cloud));
 
         Files.deleteIfExists(Paths.get("test.path"));
+    }
+
+    @Test
+    public void testMinResize() throws IOException {
+        BufferedImage image = ImageUtils.convertToImage(new File("bin/lena.png"), 128, true);
+        assertEquals(image.getHeight(), 128);
+        assertEquals(image.getWidth(), 128);
+
+        BufferedImage not_square = ImageUtils.convertToImage(new File("bin/not_square.png"), 128, true);
+        assertTrue(not_square.getHeight() == Math.round(229.0/600.0*128.0));
+        assertEquals(not_square.getWidth(), 128);
     }
 
     @Test
@@ -504,6 +518,7 @@ public class TestApiSuccess {
 
         assertTrue(result.getContentFiltering() <= 1);
         assertTrue(result.getContentFiltering() >= 0);
+        assertTrue(result.getContentFiltering() > .5);
     }
 
     @Test

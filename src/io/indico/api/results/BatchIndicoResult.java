@@ -24,7 +24,7 @@ public class BatchIndicoResult {
     @SuppressWarnings("unchecked")
     public BatchIndicoResult(Api api, Map<String, ?> response) throws IndicoException {
         this.results = new HashMap<>();
-        if (api.getResults() == null)
+        if (api.getResults() == null || api.getResults().length == 0)
             results.put(api, (List<?>) response.get("results"));
         else {
             if (response.containsKey("error")) {

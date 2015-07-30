@@ -23,7 +23,7 @@ public class IndicoResult {
     @SuppressWarnings("unchecked")
     public IndicoResult(Api api, Map<String, ?> response) throws IndicoException {
         this.results = new HashMap<>();
-        if (api.getResults() == null)
+        if (api.getResults() == null || api.getResults().length == 0)
             results.put(api, response.get("results"));
         else {
             Map<String, ?> responses = (Map<String, ?>) response.get("results");
