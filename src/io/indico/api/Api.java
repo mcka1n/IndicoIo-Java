@@ -18,11 +18,12 @@ public enum Api {
     MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities, TwitterEngagement),
 
     // IMAGE APIS
-    FER("fer", true, 48, false),
+    FER("fer", true, 48),
     ImageFeatures("imagefeatures", true, 64, false),
     FacialFeatures("facialfeatures", true, 64, false),
     ContentFiltering("contentfiltering", true, 128, true),
-    MultiImage("apis", true, 48, false, FER, ImageFeatures, FacialFeatures, ContentFiltering);
+    FacialLocalization("faciallocalization", true, -1, false),
+    MultiImage("apis", true, 48, false, FER, ImageFeatures, FacialFeatures, ContentFiltering, FacialLocalization);
 
     public String name;
     public String type;

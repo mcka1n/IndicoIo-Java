@@ -1,6 +1,8 @@
 package io.indico.api.results;
 
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
 import io.indico.api.utils.EnumParser;
+import io.indico.api.utils.ImageUtils;
 import io.indico.api.utils.IndicoException;
 
 /**
@@ -81,14 +84,13 @@ public class IndicoResult {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<Point, Map<FacialEmotion, Double>> getLocalizedFer() throws IndicoException {
-        Map<Point, Map<FacialEmotion, Double>> ret = new HashMap<>();
+    public Map<Rectangle, Map<FacialEmotion, Double>> getLocalizedFer() throws IndicoException {
+        Map<Rectangle, Map<FacialEmotion, Double>> ret = new HashMap<>();
 
         try {
             List<Map<String, Object>> result = (List<Map<String, Object>>) get(Api.FER);
             for (Map<String, Object> res : result) {
-                List<Double> point = (List<Double>) res.get("location");
-                ret.put(new Point(point.get(0).intValue(), point.get(1).intValue()),
+                ret.put(ImageUtils.getRectangle((Map<String, List<Double>>) res.get("location")),
                     EnumParser.parse(FacialEmotion.class, (Map<String, Double>) res.get("emotions"))
                 );
             }
@@ -122,6 +124,16 @@ public class IndicoResult {
     @SuppressWarnings("unchecked")
     public Double getTwitterEngagement() throws IndicoException {
         return (Double) get(Api.TwitterEngagement);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Rectangle> getFacialLocalization() throws IndicoException {
+        List<Rectangle> rectangles = new ArrayList<>();
+        for (Map<String, List<Double>> each : (List<Map<String, List<Double>>>) get(Api.FacialLocalization)) {
+            rectangles.add(ImageUtils.getRectangle(each));
+        }
+
+        return rectangles;
     }
 
     private Object get(Api name) throws IndicoException{
