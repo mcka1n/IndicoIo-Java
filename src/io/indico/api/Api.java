@@ -14,7 +14,8 @@ public enum Api {
     TextTags("texttags"),
     NamedEntities("namedentities"),
     Keywords("keywords"),
-    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities),
+    TwitterEngagement("twitterengagement"),
+    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities, TwitterEngagement),
 
     // IMAGE APIS
     FER("fer", true, 48),

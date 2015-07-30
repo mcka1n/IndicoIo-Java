@@ -13,7 +13,7 @@ import io.indico.api.ImageApi;
 import io.indico.api.TextApi;
 
 public class Indico {
-    public TextApi sentiment, sentimentHQ, political, language, textTags, keywords, namedEntities, text;
+    public TextApi sentiment, sentimentHQ, political, language, textTags, keywords, namedEntities, twitterEngagement, text;
     public ImageApi fer, facialFeatures, imageFeatures, contentFiltering, image;
 
     public String apiKey;
@@ -72,6 +72,7 @@ public class Indico {
         this.namedEntities = new TextApi(Api.NamedEntities, this.apiKey, this.cloud);
         this.text = new TextApi(Api.MultiText, this.apiKey, this.cloud);
         this.keywords = new TextApi(Api.Keywords, this.apiKey, this.cloud);
+        this.twitterEngagement = new TextApi(Api.TwitterEngagement, this.apiKey, this.cloud);
 
         this.fer = new ImageApi(Api.FER, this.apiKey, this.cloud);
         this.facialFeatures = new ImageApi(Api.FacialFeatures, this.apiKey, this.cloud);

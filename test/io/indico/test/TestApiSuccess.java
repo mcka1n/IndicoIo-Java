@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -198,6 +199,28 @@ public class TestApiSuccess {
         List<Map<TextTag, Double>> results = test.textTags.predict(new String[]{"this is great!", "this is awful!"}).getTextTags();
         assertTrue(results.size() == 2);
         assertTrue(results.get(0).size() == TextTag.values().length);
+    }
+
+    @Test
+    public void testTwitterEngagement() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+        Double result = test.twitterEngagement.predict("#Breaking rt if you <3 pic.twitter.com @Startup").getTwitterEngagement();
+
+        assertTrue(result >= 0);
+        assertTrue(result <= 1);
+    }
+
+    @Test
+    public void testBatchTwitterEngagement() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+        List<Double> result = test.twitterEngagement.predict(new String[] {
+            "#Breaking rt if you <3 pic.twitter.com @Startup",
+                "#Breaking rt if you <3 pic.twitter.com @Startup" }).getTwitterEngagement();
+
+        assertTrue(result.size() == 2);
+        assertTrue(result.get(0) <= 1);
+        assertTrue(result.get(0) >= 0);
+        assertTrue(Objects.equals(result.get(0), result.get(1)));
     }
 
     @Test
@@ -479,7 +502,8 @@ public class TestApiSuccess {
 
         IndicoResult result = test.contentFiltering.predict(example);
 
-        assertTrue(result.getContentFiltering() < .5);
+        assertTrue(result.getContentFiltering() <= 1);
+        assertTrue(result.getContentFiltering() >= 0);
     }
 
     @Test

@@ -134,6 +134,11 @@ public class BatchIndicoResult {
         return (List<Double>) get(Api.ContentFiltering);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<Double> getTwitterEngagement() throws IndicoException {
+        return (List<Double>) get(Api.TwitterEngagement);
+    }
+
     private List<?> get(Api name) throws IndicoException{
         if (!results.containsKey(name))
             throw new IndicoException(name.name + " was not included in the request");
