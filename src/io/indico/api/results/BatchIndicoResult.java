@@ -1,6 +1,7 @@
 package io.indico.api.results;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
 import io.indico.api.utils.EnumParser;
+import io.indico.api.utils.ImageUtils;
 import io.indico.api.utils.IndicoException;
 
 /**
@@ -94,16 +96,18 @@ public class BatchIndicoResult {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Map<Point, Map<FacialEmotion, Double>>> getLocalizedFer() throws IndicoException {
-        List<Map<Point, Map<FacialEmotion, Double>>> ret = new ArrayList<>();
+    public List<Map<Rectangle, Map<FacialEmotion, Double>>> getLocalizedFer() throws IndicoException {
+        List<Map<Rectangle, Map<FacialEmotion, Double>>> ret = new ArrayList<>();
 
         try {
             List<List<Map<String, Object>>> result = (List<List<Map<String, Object>>>) get(Api.FER);
             for (List<Map<String, Object>> res : result) {
-                Map<Point, Map<FacialEmotion, Double>> parsed = new HashMap<>();
+                Map<Rectangle, Map<FacialEmotion, Double>> parsed = new HashMap<>();
                 for (Map<String, Object> each : res) {
-                    List<Double> point = (List<Double>) each.get("location");
-                    parsed.put(new Point(point.get(0).intValue(), point.get(1).intValue()), EnumParser.parse(FacialEmotion.class, (Map<String, Double>) each.get("emotions")));
+                    parsed.put(ImageUtils.getRectangle(
+                        (Map<String, List<Double>>) each.get("location")),
+                        EnumParser.parse(FacialEmotion.class, (Map<String, Double>) each.get("emotions"))
+                    );
                 }
                 ret.add(parsed);
             }
@@ -137,6 +141,21 @@ public class BatchIndicoResult {
     @SuppressWarnings("unchecked")
     public List<Double> getTwitterEngagement() throws IndicoException {
         return (List<Double>) get(Api.TwitterEngagement);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<List<Rectangle>> getFacialLocalization() throws IndicoException {
+        List<List<Rectangle>> images = new ArrayList<>();
+
+        for (List<Map<String, List<Double>>> each : (List<List<Map<String, List<Double>>>>) get(Api.FacialLocalization)) {
+            List<Rectangle> rectangles = new ArrayList<>();
+            for (Map<String, List<Double>> face : each) {
+                rectangles.add(ImageUtils.getRectangle(face));
+            }
+            images.add(rectangles);
+        }
+
+        return images;
     }
 
     private List<?> get(Api name) throws IndicoException{

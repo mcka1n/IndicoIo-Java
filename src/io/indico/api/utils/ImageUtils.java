@@ -4,12 +4,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.imgscalr.Scalr;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -33,6 +35,19 @@ public class ImageUtils {
         }
 
         return imageString;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Rectangle getRectangle(Map<String, List<Double>> res) {
+        List<Double> topLeft = res.get("top_left_corner");
+        List<Double> bottomRight = res.get("bottom_right_corner");
+
+        int top = topLeft.get(1).intValue();
+        int left = topLeft.get(0).intValue();
+        int bottom = bottomRight.get(1).intValue();
+        int right = bottomRight.get(0).intValue();
+
+        return new Rectangle((left + right) / 2, (top + bottom) / 2, right - left, top - bottom);
     }
 
     public static List<BufferedImage> convertToImage(List<?> images, int size, boolean minAxis)

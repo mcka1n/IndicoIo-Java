@@ -4,6 +4,7 @@ import org.imgscalr.Scalr;
 import org.junit.Test;
 
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -293,7 +294,7 @@ public class TestApiSuccess {
 
         File lena = new File("bin/lena.png");
 
-        Map<Point, Map<FacialEmotion, Double>> results = test.fer.predict(lena, new HashMap<String, Object>() {{
+        Map<Rectangle, Map<FacialEmotion, Double>> results = test.fer.predict(lena, new HashMap<String, Object>() {{
             put("detect", true);
         }}).getLocalizedFer();
 
@@ -306,7 +307,7 @@ public class TestApiSuccess {
 
         File[] lenas = {new File("bin/lena.png")};
 
-        List<Map<Point, Map<FacialEmotion, Double>>> results = test.fer.predict(lenas, new HashMap<String, Object>() {{
+        List<Map<Rectangle, Map<FacialEmotion, Double>>> results = test.fer.predict(lenas, new HashMap<String, Object>() {{
             put("detect", true);
         }}).getLocalizedFer();
         assertTrue(results.size() == 1);
@@ -530,5 +531,28 @@ public class TestApiSuccess {
         BatchIndicoResult result = test.contentFiltering.predict(example);
 
         assertTrue(result.getContentFIltering().size() == 1);
+    }
+
+    @Test
+    public void testFacialLocalization() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File example = new File("bin/lena.png");
+
+        List<Rectangle> result = test.facialLocalization.predict(example).getFacialLocalization();
+
+        assertEquals(result.size(), 1);
+    }
+
+    @Test
+    public void testFacialLocalizationBatch() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File[] example = {new File("bin/lena.png")};
+
+        List<List<Rectangle>> result = test.facialLocalization.predict(example).getFacialLocalization();
+
+        assertEquals(result.size(), 1);
+        assertEquals(result.get(0).size(), 1);
     }
 }
