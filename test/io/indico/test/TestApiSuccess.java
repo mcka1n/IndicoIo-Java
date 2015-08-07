@@ -444,7 +444,7 @@ public class TestApiSuccess {
 
         String example = "La semaine suivante, il remporte sa premiere victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell.";
         Set<String> words = new HashSet<>();
-        Collections.addAll(words, example.toLowerCase().split(" "));
+        Collections.addAll(words, example.replaceAll("\\p{P}", "").toLowerCase().split(" "));
         IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
             private static final long serialVersionUID = 6393826713020433012L;
             {
@@ -462,7 +462,7 @@ public class TestApiSuccess {
 
         String example = "La semaine suivante, il remporte sa première victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell.";
         Set<String> words = new HashSet<>();
-        Collections.addAll(words, example.toLowerCase().split(" "));
+        Collections.addAll(words, example.replaceAll("\\p{P}", "").toLowerCase().split(" "));
         IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
             private static final long serialVersionUID = 6393826713020433012L;
             {
@@ -480,7 +480,7 @@ public class TestApiSuccess {
 
         String example = "Chris was here at Indico Data Solutions";
         Set<String> words = new HashSet<>();
-        Collections.addAll(words, example.toLowerCase().split(" "));
+        Collections.addAll(words, example.replaceAll("\\p{P}", "").toLowerCase().split(" "));
         BatchIndicoResult result = test.keywords.predict(new String[] {example, example});
         List<Map<String, Double>> results = result.getKeywords();
 
