@@ -14,13 +14,13 @@ import io.indico.api.utils.IndicoException;
 
 public class TestApiFailure {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IndicoException.class)
     public void testBadCall() throws UnsupportedOperationException, IOException, IndicoException {
         Indico test = new Indico("notanapikey");
         test.sentiment.predict("this is going to error!");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IndicoException.class)
     public void testNoApiKey() throws UnsupportedOperationException, IOException, IndicoException {
         String emptyString = null;
         Indico test = new Indico(emptyString);

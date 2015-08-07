@@ -74,7 +74,7 @@ public enum Api {
             && params != null
             && params.containsKey("detect")
             && params.get("detect") == true)
-                return -1;
+            return -1;
         return size;
     }
 }

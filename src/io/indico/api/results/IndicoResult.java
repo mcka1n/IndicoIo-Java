@@ -1,6 +1,5 @@
 package io.indico.api.results;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +39,7 @@ public class IndicoResult {
             }
         }
     }
+
     public Double getSentiment() throws IndicoException {
         return (Double) get(Api.Sentiment);
     }
@@ -60,7 +60,7 @@ public class IndicoResult {
 
     @SuppressWarnings("unchecked")
     public Map<TextTag, Double> getTextTags() throws IndicoException {
-        return EnumParser.parse(TextTag.class, (Map <String, Double>)get(Api.TextTags));
+        return EnumParser.parse(TextTag.class, (Map<String, Double>) get(Api.TextTags));
     }
 
     @SuppressWarnings("unchecked")
@@ -136,7 +136,7 @@ public class IndicoResult {
         return rectangles;
     }
 
-    private Object get(Api name) throws IndicoException{
+    private Object get(Api name) throws IndicoException {
         if (!results.containsKey(name))
             throw new IndicoException(name.name + " was not included in the request");
         return results.get(name);

@@ -1,9 +1,7 @@
 package io.indico.test;
 
-import org.imgscalr.Scalr;
 import org.junit.Test;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -40,7 +38,7 @@ import static org.junit.Assert.assertTrue;
 public class TestApiSuccess {
 
     @Test
-    public void testConfigFile() throws IOException {
+    public void testConfigFile() throws IOException, IndicoException {
         String apiKey = "NotReallyAnApiKey";
         String cloud = "NotReallyAPrivateCloud";
         Indico test = new Indico(apiKey, cloud);
@@ -429,7 +427,48 @@ public class TestApiSuccess {
         String example = "Chris was here at Indico Data Solutions";
         Set<String> words = new HashSet<>();
         Collections.addAll(words, example.toLowerCase().split(" "));
-        IndicoResult result = test.keywords.predict(example);
+        IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 6393826713020433012L;
+            {
+                put("language", "detect");
+            }
+        });
+        Map<String, Double> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.keySet()));
+    }
+
+    @Test
+    public void testKeywordsLanguageApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "La semaine suivante, il remporte sa premiere victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell.";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 6393826713020433012L;
+            {
+                put("language", "French");
+            }
+        });
+        Map<String, Double> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.keySet()));
+    }
+
+    @Test
+    public void testKeywordsLanguageAutoDetectApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "La semaine suivante, il remporte sa première victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell.";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 6393826713020433012L;
+            {
+                put("language", "detect");
+            }
+        });
         Map<String, Double> results = result.getKeywords();
 
         assertTrue(words.containsAll(results.keySet()));

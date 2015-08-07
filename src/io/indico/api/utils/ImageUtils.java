@@ -60,7 +60,7 @@ public class ImageUtils {
                 convertedInput.add(convertToImage((String) entry, size, minAxis));
             } else {
                 throw new IllegalArgumentException(
-                        "imageCall method only supports lists of Files and lists of Strings"
+                    "imageCall method only supports lists of Files and lists of Strings"
                 );
             }
         }
@@ -104,7 +104,7 @@ public class ImageUtils {
             type = FilenameUtils.getExtension((String) entry);
         } else {
             throw new IllegalArgumentException(
-                    "imageCall method only supports lists of Files and lists of Strings"
+                "imageCall method only supports lists of Files and lists of Strings"
             );
         }
 

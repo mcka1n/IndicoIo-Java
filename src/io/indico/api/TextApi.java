@@ -12,10 +12,10 @@ import io.indico.api.utils.IndicoException;
 /**
  * Created by Chris on 6/26/15.
  */
-public class TextApi extends ApiClient{
+public class TextApi extends ApiClient {
     Api api;
 
-    public TextApi(Api api, String apiKey, String privateCloud) {
+    public TextApi(Api api, String apiKey, String privateCloud) throws IndicoException {
         super(apiKey, privateCloud);
         this.api = api;
     }
