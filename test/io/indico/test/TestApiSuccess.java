@@ -2,7 +2,7 @@ package io.indico.test;
 
 import org.junit.Test;
 
-import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -28,14 +29,16 @@ import io.indico.api.text.Category;
 import io.indico.api.text.Language;
 import io.indico.api.text.PoliticalClass;
 import io.indico.api.text.TextTag;
+import io.indico.api.utils.ImageUtils;
 import io.indico.api.utils.IndicoException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestApiSuccess {
 
     @Test
-    public void testConfigFile() throws IOException {
+    public void testConfigFile() throws IOException, IndicoException {
         String apiKey = "NotReallyAnApiKey";
         String cloud = "NotReallyAPrivateCloud";
         Indico test = new Indico(apiKey, cloud);
@@ -46,6 +49,17 @@ public class TestApiSuccess {
         assertTrue(check.cloud.equals(cloud));
 
         Files.deleteIfExists(Paths.get("test.path"));
+    }
+
+    @Test
+    public void testMinResize() throws IOException {
+        BufferedImage image = ImageUtils.convertToImage(new File("bin/lena.png"), 128, true);
+        assertEquals(image.getHeight(), 128);
+        assertEquals(image.getWidth(), 128);
+
+        BufferedImage not_square = ImageUtils.convertToImage(new File("bin/not_square.png"), 128, true);
+        assertTrue(not_square.getHeight() == Math.round(229.0/600.0*128.0));
+        assertEquals(not_square.getWidth(), 128);
     }
 
     @Test
@@ -201,6 +215,28 @@ public class TestApiSuccess {
     }
 
     @Test
+    public void testTwitterEngagement() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+        Double result = test.twitterEngagement.predict("#Breaking rt if you <3 pic.twitter.com @Startup").getTwitterEngagement();
+
+        assertTrue(result >= 0);
+        assertTrue(result <= 1);
+    }
+
+    @Test
+    public void testBatchTwitterEngagement() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+        List<Double> result = test.twitterEngagement.predict(new String[] {
+            "#Breaking rt if you <3 pic.twitter.com @Startup",
+                "#Breaking rt if you <3 pic.twitter.com @Startup" }).getTwitterEngagement();
+
+        assertTrue(result.size() == 2);
+        assertTrue(result.get(0) <= 1);
+        assertTrue(result.get(0) >= 0);
+        assertTrue(Objects.equals(result.get(0), result.get(1)));
+    }
+
+    @Test
     public void testFERString() throws IOException, IndicoException {
         Indico test = new Indico(new File("config.properties"));
 
@@ -256,7 +292,7 @@ public class TestApiSuccess {
 
         File lena = new File("bin/lena.png");
 
-        Map<Point, Map<FacialEmotion, Double>> results = test.fer.predict(lena, new HashMap<String, Object>() {{
+        Map<Rectangle, Map<FacialEmotion, Double>> results = test.fer.predict(lena, new HashMap<String, Object>() {{
             put("detect", true);
         }}).getLocalizedFer();
 
@@ -269,7 +305,7 @@ public class TestApiSuccess {
 
         File[] lenas = {new File("bin/lena.png")};
 
-        List<Map<Point, Map<FacialEmotion, Double>>> results = test.fer.predict(lenas, new HashMap<String, Object>() {{
+        List<Map<Rectangle, Map<FacialEmotion, Double>>> results = test.fer.predict(lenas, new HashMap<String, Object>() {{
             put("detect", true);
         }}).getLocalizedFer();
         assertTrue(results.size() == 1);
@@ -391,7 +427,48 @@ public class TestApiSuccess {
         String example = "Chris was here at Indico Data Solutions";
         Set<String> words = new HashSet<>();
         Collections.addAll(words, example.toLowerCase().split(" "));
-        IndicoResult result = test.keywords.predict(example);
+        IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 6393826713020433012L;
+            {
+                put("language", "detect");
+            }
+        });
+        Map<String, Double> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.keySet()));
+    }
+
+    @Test
+    public void testKeywordsLanguageApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "La semaine suivante, il remporte sa premiere victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell.";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 6393826713020433012L;
+            {
+                put("language", "French");
+            }
+        });
+        Map<String, Double> results = result.getKeywords();
+
+        assertTrue(words.containsAll(results.keySet()));
+    }
+
+    @Test
+    public void testKeywordsLanguageAutoDetectApi() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example = "La semaine suivante, il remporte sa première victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell.";
+        Set<String> words = new HashSet<>();
+        Collections.addAll(words, example.toLowerCase().split(" "));
+        IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 6393826713020433012L;
+            {
+                put("language", "detect");
+            }
+        });
         Map<String, Double> results = result.getKeywords();
 
         assertTrue(words.containsAll(results.keySet()));
@@ -479,7 +556,9 @@ public class TestApiSuccess {
 
         IndicoResult result = test.contentFiltering.predict(example);
 
-        assertTrue(result.getContentFiltering() < .5);
+        assertTrue(result.getContentFiltering() <= 1);
+        assertTrue(result.getContentFiltering() >= 0);
+        assertTrue(result.getContentFiltering() > .5);
     }
 
     @Test
@@ -491,5 +570,28 @@ public class TestApiSuccess {
         BatchIndicoResult result = test.contentFiltering.predict(example);
 
         assertTrue(result.getContentFIltering().size() == 1);
+    }
+
+    @Test
+    public void testFacialLocalization() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File example = new File("bin/lena.png");
+
+        List<Rectangle> result = test.facialLocalization.predict(example).getFacialLocalization();
+
+        assertEquals(result.size(), 1);
+    }
+
+    @Test
+    public void testFacialLocalizationBatch() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File[] example = {new File("bin/lena.png")};
+
+        List<List<Rectangle>> result = test.facialLocalization.predict(example).getFacialLocalization();
+
+        assertEquals(result.size(), 1);
+        assertEquals(result.get(0).size(), 1);
     }
 }

@@ -5,11 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.indico.api.image.FacialEmotion;
-import io.indico.api.text.Category;
 import io.indico.api.text.Language;
-import io.indico.api.text.PoliticalClass;
-import io.indico.api.text.TextTag;
 
 /**
  * Created by Chris on 6/23/15.

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>indicoio-java</groupId>
   <artifactId>indicoio-java</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <packaging>jar</packaging>
   <name>indico</name>
   <description>A Java Wrapper for indico. Use pre-built state of the art machine learning algorithms with a single line of code.</description>

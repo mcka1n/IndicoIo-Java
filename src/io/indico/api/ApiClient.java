@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import io.indico.api.results.BatchIndicoResult;
 import io.indico.api.results.IndicoResult;
 import io.indico.api.utils.ImageUtils;
@@ -33,24 +34,24 @@ public class ApiClient {
     public String baseEndpoint;
     public String batchEndpoint;
 
-    public ApiClient(String apiKey, String privateCloud) {
+    public ApiClient(String apiKey, String privateCloud) throws IndicoException {
         this(PUBLIC_BASE_URL, apiKey, privateCloud);
     }
 
     IndicoResult call(Api api, BufferedImage data, String type, Map<String, Object> extraParams)
-            throws UnsupportedOperationException, IOException, IndicoException {
+        throws UnsupportedOperationException, IOException, IndicoException {
         return call(api, ImageUtils.encodeImage(data, type), extraParams);
     }
 
     IndicoResult call(Api api, String data, Map<String, Object> extraParams)
-            throws UnsupportedOperationException, IOException, IndicoException {
+        throws UnsupportedOperationException, IOException, IndicoException {
 
         Map<String, ?> apiResponse = baseCall(api, data, extraParams);
         return new IndicoResult(api, apiResponse);
     }
 
     BatchIndicoResult call(Api api, List<BufferedImage> data, String type, Map<String, Object> extraParams)
-            throws UnsupportedOperationException, IOException, IndicoException {
+        throws UnsupportedOperationException, IOException, IndicoException {
         List<String> batchedData = new ArrayList<>(data.size());
         for (BufferedImage image : data)
             batchedData.add(ImageUtils.encodeImage(image, type));
@@ -58,7 +59,7 @@ public class ApiClient {
     }
 
     BatchIndicoResult call(Api api, List<String> data, Map<String, Object> extraParams)
-            throws UnsupportedOperationException, IOException, IndicoException {
+        throws UnsupportedOperationException, IOException, IndicoException {
 
         Map<String, List<?>> apiResponse = baseCall(api, data, extraParams);
         return new BatchIndicoResult(api, apiResponse);
@@ -66,7 +67,7 @@ public class ApiClient {
 
     @SuppressWarnings("unchecked")
     private Map<String, ?> baseCall(Api api, String data, Map<String, Object> extraParams)
-            throws UnsupportedOperationException, IOException, IndicoException {
+        throws UnsupportedOperationException, IOException, IndicoException {
         HttpResponse response = httpClient.execute(getBasePost(api, data, extraParams, false));
         HttpEntity entity = response.getEntity();
 
@@ -78,7 +79,7 @@ public class ApiClient {
                 String responseString = IOUtils.toString(responseStream, "UTF-8");
                 apiResponse = new Gson().fromJson(responseString, Map.class);
                 if (apiResponse.containsKey("error")) {
-                    throw new IllegalArgumentException((String) apiResponse.get("error"));
+                    throw new IndicoException((String) apiResponse.get("error"));
                 }
             } finally {
                 responseStream.close();
@@ -90,7 +91,7 @@ public class ApiClient {
 
     @SuppressWarnings("unchecked")
     private Map<String, List<?>> baseCall(Api api, List<String> data, Map<String, Object> extraParams)
-            throws IOException, IndicoException {
+        throws IOException, IndicoException {
         HttpResponse response = httpClient.execute(getBasePost(api, data, extraParams, true));
         HttpEntity entity = response.getEntity();
 
@@ -108,7 +109,7 @@ public class ApiClient {
     }
 
     private HttpPost getBasePost(Api api, Object data, Map<String, Object> extraParams, boolean batch)
-            throws UnsupportedEncodingException, IndicoException {
+        throws UnsupportedEncodingException, IndicoException {
         String url = String.format(batch ? batchEndpoint : baseEndpoint, api) + addUrlParams(api, extraParams);
 
         HttpPost basePost = new HttpPost(url);
@@ -119,13 +120,14 @@ public class ApiClient {
         rawParams.put("data", data);
 
         String entity = new Gson().toJson(rawParams);
-        StringEntity params = new StringEntity(entity);
+        StringEntity params = new StringEntity(entity, "utf-8");
         params.setContentType("application/json");
         basePost.setEntity(params);
 
         basePost.addHeader("content-type", "application/json");
         basePost.addHeader("client-lib", "java");
         basePost.addHeader("client-lib", "1.4");
+        basePost.addHeader("Accept-Charset", "utf-8");
 
         return basePost;
     }
@@ -151,13 +153,13 @@ public class ApiClient {
         return builder.toString();
     }
 
-    private ApiClient(String baseUrl, String apiKey, String privateCloud) {
+    private ApiClient(String baseUrl, String apiKey, String privateCloud) throws IndicoException {
         if (apiKey == null) {
-            throw new IllegalArgumentException("API key cannot be null");
+            throw new IndicoException("API key cannot be null");
         }
 
         this.baseUrl = privateCloud == null ?
-                baseUrl : "https://" + privateCloud + ".indico.domains";
+            baseUrl : "https://" + privateCloud + ".indico.domains";
         this.baseEndpoint = this.baseUrl + "/%1$2s?key=" + apiKey;
         this.batchEndpoint = this.baseUrl + "/%1$2s/batch" + "?key=" + apiKey;
     }

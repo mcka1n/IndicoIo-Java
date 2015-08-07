@@ -5,9 +5,9 @@ package io.indico.api.utils;
  */
 public class IndicoException extends Exception {
 
-	private static final long serialVersionUID = 3428775343491048355L;
+    private static final long serialVersionUID = 3428775343491048355L;
 
-	public IndicoException(String message) {
+    public IndicoException(String message) {
         super(message);
     }
 }

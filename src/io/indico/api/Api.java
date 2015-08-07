@@ -14,19 +14,21 @@ public enum Api {
     TextTags("texttags"),
     NamedEntities("namedentities"),
     Keywords("keywords"),
-    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities),
+    TwitterEngagement("twitterengagement"),
+    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities, TwitterEngagement),
 
     // IMAGE APIS
     FER("fer", true, 48),
-    ImageFeatures("imagefeatures", true, 64),
-    FacialFeatures("facialfeatures", true, 64),
-    ContentFiltering("contentfiltering", true, -1),
-    MultiImage("apis", true, 48, FER, ImageFeatures, FacialFeatures, ContentFiltering);
+    ImageFeatures("imagefeatures", true, 64, false),
+    FacialFeatures("facialfeatures", true, 64, false),
+    ContentFiltering("contentfiltering", true, 128, true),
+    FacialLocalization("faciallocalization", true, -1, false),
+    MultiImage("apis", true, 48, false, FER, ImageFeatures, FacialFeatures, ContentFiltering, FacialLocalization);
 
     public String name;
     public String type;
     public int size;
-    public boolean isImageApi;
+    public boolean isImageApi, minResize;
     public Api[] results;
 
     Api(String name) {
@@ -41,11 +43,12 @@ public enum Api {
     }
 
     Api(String name, Api... apis) {
-        this(name, false, 0, apis);
+        this(name, false, 0, false, apis);
     }
 
-    Api(String name, boolean isImageApi, int size, Api... apis) {
+    Api(String name, boolean isImageApi, int size, boolean minResize, Api... apis) {
         this(name, isImageApi, size);
+        this.minResize = minResize;
         this.results = apis;
     }
 
@@ -71,7 +74,7 @@ public enum Api {
             && params != null
             && params.containsKey("detect")
             && params.get("detect") == true)
-                return -1;
+            return -1;
         return size;
     }
 }
