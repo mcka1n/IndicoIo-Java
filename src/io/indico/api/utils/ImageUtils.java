@@ -4,12 +4,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.imgscalr.Scalr;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -35,32 +37,53 @@ public class ImageUtils {
         return imageString;
     }
 
-    public static List<BufferedImage> convertToImage(List<?> images, int size) throws IOException {
+    @SuppressWarnings("unchecked")
+    public static Rectangle getRectangle(Map<String, List<Double>> res) {
+        List<Double> topLeft = res.get("top_left_corner");
+        List<Double> bottomRight = res.get("bottom_right_corner");
+
+        int top = topLeft.get(1).intValue();
+        int left = topLeft.get(0).intValue();
+        int bottom = bottomRight.get(1).intValue();
+        int right = bottomRight.get(0).intValue();
+
+        return new Rectangle((left + right) / 2, (top + bottom) / 2, right - left, top - bottom);
+    }
+
+    public static List<BufferedImage> convertToImage(List<?> images, int size, boolean minAxis)
+        throws IOException {
         List<BufferedImage> convertedInput = new ArrayList<>();
         for (Object entry : images) {
             if (entry instanceof File) {
-                convertedInput.add(convertToImage((File) entry, size));
+                convertedInput.add(convertToImage((File) entry, size, minAxis));
             } else if (entry instanceof String) {
-                convertedInput.add(convertToImage((String) entry, size));
+                convertedInput.add(convertToImage((String) entry, size, minAxis));
             } else {
                 throw new IllegalArgumentException(
-                        "imageCall method only supports lists of Files and lists of Strings"
+                    "imageCall method only supports lists of Files and lists of Strings"
                 );
             }
         }
         return convertedInput;
     }
 
-    public static BufferedImage convertToImage(File imageFile, int size) throws IOException {
+    public static BufferedImage convertToImage(File imageFile, int size, boolean minAxis) throws IOException {
         if (size == -1) {
             return ImageIO.read(imageFile);
         }
 
-        return Scalr.resize(ImageIO.read(imageFile), size);
+        BufferedImage image = ImageIO.read(imageFile);
+
+        double aspect = image.getWidth() / image.getHeight();
+        if (aspect >= 10 || aspect <= .1)
+            System.out.println("WARNING: We we recommend images with aspect ratio less than 1:10");
+
+        Scalr.Mode method = minAxis ? Scalr.Mode.AUTOMATIC : Scalr.Mode.FIT_EXACT;
+        return Scalr.resize(image, method, size);
     }
 
-    public static BufferedImage convertToImage(String filePath, int size) throws IOException {
-        return convertToImage(new File(filePath), size);
+    public static BufferedImage convertToImage(String filePath, int size, boolean minAxis) throws IOException {
+        return convertToImage(new File(filePath), size, minAxis);
     }
 
     public static String grabType(String filePath) throws IOException {
@@ -81,7 +104,7 @@ public class ImageUtils {
             type = FilenameUtils.getExtension((String) entry);
         } else {
             throw new IllegalArgumentException(
-                    "imageCall method only supports lists of Files and lists of Strings"
+                "imageCall method only supports lists of Files and lists of Strings"
             );
         }
 

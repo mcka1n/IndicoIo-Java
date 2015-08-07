@@ -11,27 +11,28 @@ import java.util.Properties;
 import io.indico.api.Api;
 import io.indico.api.ImageApi;
 import io.indico.api.TextApi;
+import io.indico.api.utils.IndicoException;
 
 public class Indico {
-    public TextApi sentiment, sentimentHQ, political, language, textTags, keywords, namedEntities, text;
-    public ImageApi fer, facialFeatures, imageFeatures, contentFiltering, image;
+    public TextApi sentiment, sentimentHQ, political, language, textTags, keywords, namedEntities, twitterEngagement, text;
+    public ImageApi fer, facialFeatures, imageFeatures, contentFiltering, facialLocalization, image;
 
     public String apiKey;
     public String cloud;
 
-    public Indico(String apiKey) {
+    public Indico(String apiKey) throws IndicoException {
         this.apiKey = apiKey;
         this.initializeClients();
     }
 
-    public Indico(String apiKey, String privateCloud) {
+    public Indico(String apiKey, String privateCloud) throws IndicoException {
         this.apiKey = apiKey;
         this.cloud = privateCloud;
 
         this.initializeClients();
     }
 
-    public Indico(File configurationFile) throws IOException {
+    public Indico(File configurationFile) throws IOException, IndicoException {
         Properties prop = new Properties();
         InputStream input = new FileInputStream(configurationFile);
         prop.load(input);
@@ -42,16 +43,9 @@ public class Indico {
         this.initializeClients();
     }
 
-    public Indico() throws IOException {
-        this.apiKey = System.getenv("INDICO_API_KEY");
-        this.cloud = System.getenv("INDICO_CLOUD");
-
-        this.initializeClients();
-    }
-
     public void createPropertiesFile(String filePath) throws IOException {
         Properties prop = new Properties();
-        OutputStream output = null;
+        OutputStream output;
 
         output = new FileOutputStream(filePath);
         prop.setProperty("apiKey", this.apiKey);
@@ -63,7 +57,7 @@ public class Indico {
         output.close();
     }
 
-    private void initializeClients() {
+    private void initializeClients() throws IndicoException {
         this.sentiment = new TextApi(Api.Sentiment, this.apiKey, this.cloud);
         this.sentimentHQ = new TextApi(Api.SentimentHQ, this.apiKey, this.cloud);
         this.political = new TextApi(Api.Political, this.apiKey, this.cloud);
@@ -72,11 +66,13 @@ public class Indico {
         this.namedEntities = new TextApi(Api.NamedEntities, this.apiKey, this.cloud);
         this.text = new TextApi(Api.MultiText, this.apiKey, this.cloud);
         this.keywords = new TextApi(Api.Keywords, this.apiKey, this.cloud);
+        this.twitterEngagement = new TextApi(Api.TwitterEngagement, this.apiKey, this.cloud);
 
         this.fer = new ImageApi(Api.FER, this.apiKey, this.cloud);
         this.facialFeatures = new ImageApi(Api.FacialFeatures, this.apiKey, this.cloud);
         this.imageFeatures = new ImageApi(Api.ImageFeatures, this.apiKey, this.cloud);
         this.contentFiltering = new ImageApi(Api.ContentFiltering, this.apiKey, this.cloud);
+        this.facialLocalization = new ImageApi(Api.FacialLocalization, this.apiKey, this.cloud);
         this.image = new ImageApi(Api.MultiImage, this.apiKey, this.cloud);
     }
 
