@@ -126,7 +126,7 @@ public class ApiClient {
 
         basePost.addHeader("content-type", "application/json");
         basePost.addHeader("client-lib", "java");
-        basePost.addHeader("client-lib", "1.4");
+        basePost.addHeader("client-lib", "3.2");
         basePost.addHeader("Accept-Charset", "utf-8");
 
         return basePost;

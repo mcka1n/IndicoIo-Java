@@ -1,10 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>indicoio-java</groupId>
-  <artifactId>indicoio-java</artifactId>
-  <version>0.3.1</version>
+  <groupId>io.indico</groupId>
+  <artifactId>io.indico</artifactId>
+  <version>3.2.0</version>
   <packaging>jar</packaging>
-  <name>indico</name>
   <description>A Java Wrapper for indico. Use pre-built state of the art machine learning algorithms with a single line of code.</description>
   <url>http://indico.io</url>
   <licenses>
