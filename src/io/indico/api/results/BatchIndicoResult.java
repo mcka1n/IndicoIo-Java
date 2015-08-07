@@ -1,6 +1,5 @@
 package io.indico.api.results;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,7 +104,7 @@ public class BatchIndicoResult {
                 Map<Rectangle, Map<FacialEmotion, Double>> parsed = new HashMap<>();
                 for (Map<String, Object> each : res) {
                     parsed.put(ImageUtils.getRectangle(
-                        (Map<String, List<Double>>) each.get("location")),
+                            (Map<String, List<Double>>) each.get("location")),
                         EnumParser.parse(FacialEmotion.class, (Map<String, Double>) each.get("emotions"))
                     );
                 }
@@ -158,7 +157,7 @@ public class BatchIndicoResult {
         return images;
     }
 
-    private List<?> get(Api name) throws IndicoException{
+    private List<?> get(Api name) throws IndicoException {
         if (!results.containsKey(name))
             throw new IndicoException(name.name + " was not included in the request");
         return results.get(name);
