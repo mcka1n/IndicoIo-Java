@@ -30,9 +30,7 @@ public class ApiClient {
     private final static String PUBLIC_BASE_URL = "https://apiv2.indico.io";
 
     private static HttpClient httpClient = HttpClients.createDefault();
-    public String baseUrl;
-    public String baseEndpoint;
-    public String batchEndpoint;
+    public String baseUrl, apiKey, privateCloud;
 
     public ApiClient(String apiKey, String privateCloud) throws IndicoException {
         this(PUBLIC_BASE_URL, apiKey, privateCloud);
@@ -43,11 +41,18 @@ public class ApiClient {
         return call(api, ImageUtils.encodeImage(data, type), extraParams);
     }
 
+
     IndicoResult call(Api api, String data, Map<String, Object> extraParams)
         throws UnsupportedOperationException, IOException, IndicoException {
 
         Map<String, ?> apiResponse = baseCall(api, data, extraParams);
         return new IndicoResult(api, apiResponse);
+    }
+
+    BatchIndicoResult call(Api api, Map<String, Object> data, Map<String, Object> extraParams)
+        throws UnsupportedOperationException, IOException, IndicoException {
+        Map<String, List<?>> apiResponse = baseCall(api, data, extraParams);
+        return new BatchIndicoResult(api, apiResponse);
     }
 
     BatchIndicoResult call(Api api, List<BufferedImage> data, String type, Map<String, Object> extraParams)
@@ -108,9 +113,34 @@ public class ApiClient {
         return apiResponse;
     }
 
+    @SuppressWarnings("unchecked")
+    private Map<String, List<?>> baseCall(Api api, Map<String, Object> data, Map<String, Object> extraParams)
+        throws IOException, IndicoException {
+        HttpResponse response = httpClient.execute(getBasePost(api, data, extraParams, true));
+        HttpEntity entity = response.getEntity();
+
+        Map<String, List<?>> apiResponse = new HashMap<>();
+        if (entity != null) {
+            InputStream responseStream = entity.getContent();
+            Reader reader = new InputStreamReader(responseStream, "UTF-8");
+            try {
+                apiResponse = new Gson().fromJson(reader, Map.class);
+            } finally {
+                responseStream.close();
+            }
+        }
+        return apiResponse;
+    }
+
     private HttpPost getBasePost(Api api, Object data, Map<String, Object> extraParams, boolean batch)
         throws UnsupportedEncodingException, IndicoException {
-        String url = String.format(batch ? batchEndpoint : baseEndpoint, api) + addUrlParams(api, extraParams);
+
+        String url = baseUrl
+            + (api.type == ApiType.Multi ? "/apis" : "")
+            + "/" + api.toString()
+            + (batch ? "/batch" : "")
+            + "?key=" + apiKey
+            + addUrlParams(api, extraParams);
 
         HttpPost basePost = new HttpPost(url);
 
@@ -134,17 +164,17 @@ public class ApiClient {
 
     private String addUrlParams(Api api, Map<String, Object> extraParams) throws IndicoException {
         StringBuilder builder = new StringBuilder();
-        if (api == Api.MultiImage || api == Api.MultiText) {
+        if (api.type == ApiType.Multi) {
             if (!extraParams.containsKey("apis"))
-                throw new IndicoException("Apis argument for predictImage cannot be empty");
+                throw new IndicoException("Apis argument cannot be empty");
             Api[] apis = (Api[]) extraParams.get("apis");
             if (apis.length == 0)
-                throw new IndicoException("Apis argument for predictImage cannot be empty");
+                throw new IndicoException("Apis argument cannot be empty");
             builder.append("&apis=");
             for (Api each : apis) {
-                if (api.isImage() != each.isImage())
+                if (api.get("type") != each.type)
                     throw new IndicoException(api.name() + "is not an " + api.type + "Api");
-                builder.append(each.getName()).append(",");
+                builder.append(each.toString()).append(",");
             }
 
             extraParams.remove("apis");
@@ -160,7 +190,7 @@ public class ApiClient {
 
         this.baseUrl = privateCloud == null ?
             baseUrl : "https://" + privateCloud + ".indico.domains";
-        this.baseEndpoint = this.baseUrl + "/%1$2s?key=" + apiKey;
-        this.batchEndpoint = this.baseUrl + "/%1$2s/batch" + "?key=" + apiKey;
+        this.apiKey = apiKey;
+        this.privateCloud = privateCloud;
     }
 }
