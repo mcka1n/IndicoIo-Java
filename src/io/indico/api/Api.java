@@ -1,80 +1,69 @@
 package io.indico.api;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Chris on 6/22/15.
  */
 public enum Api {
     // TEXT APIS
-    Sentiment("sentiment"),
-    SentimentHQ("sentimenthq"),
-    Political("political"),
-    Language("language"),
-    TextTags("texttags"),
-    NamedEntities("namedentities"),
-    Keywords("keywords"),
-    TwitterEngagement("twitterengagement"),
-    MultiText("apis", Sentiment, SentimentHQ, Political, Language, TextTags, Keywords, NamedEntities, TwitterEngagement),
+    Sentiment(ApiType.Text, "sentiment"),
+    SentimentHQ(ApiType.Text, "sentimenthq"),
+    Political(ApiType.Text, "political"),
+    Language(ApiType.Text, "language"),
+    TextTags(ApiType.Text, "texttags"),
+    NamedEntities(ApiType.Text, "namedentities"),
+    Keywords(ApiType.Text, "keywords"),
+    TwitterEngagement(ApiType.Text, "twitterengagement"),
 
     // IMAGE APIS
-    FER("fer", true, 48),
-    ImageFeatures("imagefeatures", true, 64, false),
-    FacialFeatures("facialfeatures", true, 64, false),
-    ContentFiltering("contentfiltering", true, 128, true),
-    FacialLocalization("faciallocalization", true, -1, false),
-    MultiImage("apis", true, 48, false, FER, ImageFeatures, FacialFeatures, ContentFiltering, FacialLocalization);
+    FER(ApiType.Image, "fer", "size", 64, "minResize", false),
+    ImageFeatures(ApiType.Image, "imagefeatures", "size", 64, "minResize", false),
+    FacialFeatures(ApiType.Image, "facialfeatures", "size", 64, "minResize", false),
+    ContentFiltering(ApiType.Image, "contentfiltering", "size", 128, "minResize", true),
+    FacialLocalization(ApiType.Image, "faciallocalization", "size", -1, "minResize", false),
 
-    public String name;
-    public String type;
-    public int size;
-    public boolean isImageApi, minResize;
-    public Api[] results;
+    // MULTI APIS
+    Intersections(ApiType.Multi, "intersections", "type", ApiType.Text),
+    MultiText(ApiType.Multi, "multiapi", "type", ApiType.Text),
+    MultiImage(ApiType.Multi, "multiapi", "type", ApiType.Image, "size", 64, "minResize", false);
 
-    Api(String name) {
-        this(name, false, 0);
-    }
+    public ApiType type;
+    String endpoint;
+    Map<String, Object> params;
 
-    Api(String name, boolean isImageApi, int size) {
-        this.isImageApi = isImageApi;
-        this.name = name;
-        this.type = isImageApi ? "image" : "text";
-        this.size = size;
-    }
+    Api(ApiType type, String endpoint, Object... params) {
+        this.type = type;
+        this.endpoint = endpoint;
 
-    Api(String name, Api... apis) {
-        this(name, false, 0, false, apis);
-    }
-
-    Api(String name, boolean isImageApi, int size, boolean minResize, Api... apis) {
-        this(name, isImageApi, size);
-        this.minResize = minResize;
-        this.results = apis;
-    }
-
-    public Api[] getResults() {
-        return results;
-    }
-
-    public boolean isImage() {
-        return isImageApi;
+        assert params.length % 2 == 0;
+        List<Object> paramList = Arrays.asList(params);
+        this.params = new HashMap<>();
+        for (int i = 0; i < paramList.size(); i += 2) {
+            this.params.put(
+                String.valueOf(paramList.get(i)),
+                paramList.get(i + 1)
+            );
+        }
     }
 
     @Override
     public String toString() {
-        return name;
+        return endpoint;
     }
 
-    public String getName() {
-        return name;
+    public Object get(String key) {
+        return params != null ? params.get(key) : null;
     }
 
-    public int getSize(HashMap<String, Object> params) {
-        if (this == Api.FER
-            && params != null
-            && params.containsKey("detect")
-            && params.get("detect") == true)
+    public int getSize(Map<String, Object> userParams) {
+        if (this == Api.FER && userParams != null && userParams.get("detect") == true) {
             return -1;
-        return size;
+        }
+
+        return (Integer) get("size");
     }
 }
