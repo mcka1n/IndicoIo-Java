@@ -20,25 +20,25 @@ import io.indico.api.utils.IndicoException;
  * Created by Chris on 6/23/15.
  */
 public class BatchIndicoResult {
-    Map<Api, List<?>> results;
+    Map<Api, Object> results;
 
     @SuppressWarnings("unchecked")
     public BatchIndicoResult(Api api, Map<String, ?> response) throws IndicoException {
         this.results = new HashMap<>();
-        if (api.getResults() == null || api.getResults().length == 0)
-            results.put(api, (List<?>) response.get("results"));
+        if (api != Api.MultiImage && api != Api.MultiText)
+            results.put(api, response.get("results"));
         else {
             if (response.containsKey("error")) {
-                throw new IndicoException(api.name + " failed with error " + response.get("error"));
+                throw new IndicoException(api + " failed with error " + response.get("error"));
             }
             Map<String, ?> responses = (Map<String, ?>) response.get("results");
-            for (Api res : api.results) {
-                if (!responses.containsKey(res.name))
+            for (Api res : Api.values()) {
+                if (!responses.containsKey(res.toString()))
                     continue;
-                Map<String, ?> apiResponse = (Map<String, ?>) responses.get(res.name);
+                Map<String, ?> apiResponse = (Map<String, ?>) responses.get(res.toString());
                 if (apiResponse.containsKey("error"))
-                    throw new IndicoException(res.name + " failed with error " + apiResponse.get("error"));
-                results.put(res, (List<?>) apiResponse.get("results"));
+                    throw new IndicoException(res + " failed with error " + apiResponse.get("error"));
+                results.put(res, apiResponse.get("results"));
             }
         }
     }
@@ -157,10 +157,16 @@ public class BatchIndicoResult {
         return images;
     }
 
-    private List<?> get(Api name) throws IndicoException {
-        if (!results.containsKey(name))
-            throw new IndicoException(name.name + " was not included in the request");
-        return results.get(name);
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Map<String, Map<String, Double>>> getIntersections() throws IndicoException {
+        return (Map<String, Map<String, Map<String, Double>>>) get(Api.Intersections);
+    }
+
+    private Object get(Api api) throws IndicoException {
+        if (!results.containsKey(api))
+            throw new IndicoException(api.toString() + " was not included in the request");
+        return results.get(api);
     }
 }
 

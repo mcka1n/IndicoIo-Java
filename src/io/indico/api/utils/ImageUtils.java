@@ -57,7 +57,7 @@ public class ImageUtils {
             if (entry instanceof File) {
                 convertedInput.add(convertToImage((File) entry, size, minAxis));
             } else if (entry instanceof String) {
-                convertedInput.add(convertToImage((String) entry, size, minAxis));
+                convertedInput.add(convertToImage(new File((String) entry), size, minAxis));
             } else {
                 throw new IllegalArgumentException(
                     "imageCall method only supports lists of Files and lists of Strings"
@@ -82,9 +82,6 @@ public class ImageUtils {
         return Scalr.resize(image, method, size);
     }
 
-    public static BufferedImage convertToImage(String filePath, int size, boolean minAxis) throws IOException {
-        return convertToImage(new File(filePath), size, minAxis);
-    }
 
     public static String grabType(String filePath) throws IOException {
         return grabType(new File(filePath));

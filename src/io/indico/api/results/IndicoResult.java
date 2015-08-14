@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.indico.api.Api;
+import io.indico.api.ApiType;
 import io.indico.api.image.FacialEmotion;
 import io.indico.api.text.Category;
 import io.indico.api.text.Language;
@@ -25,16 +26,16 @@ public class IndicoResult {
     @SuppressWarnings("unchecked")
     public IndicoResult(Api api, Map<String, ?> response) throws IndicoException {
         this.results = new HashMap<>();
-        if (api.getResults() == null || api.getResults().length == 0)
+        if (api.type != ApiType.Multi)
             results.put(api, response.get("results"));
         else {
             Map<String, ?> responses = (Map<String, ?>) response.get("results");
-            for (Api res : api.results) {
-                Map<String, ?> apiResponse = (Map<String, ?>) responses.get(res.name);
+            for (Api res : Api.values()) {
+                Map<String, ?> apiResponse = (Map<String, ?>) responses.get(res.toString());
                 if (apiResponse == null)
                     continue;
                 if (apiResponse.containsKey("error"))
-                    throw new IndicoException(api.name + " failed with error " + apiResponse.get("error"));
+                    throw new IndicoException(api + " failed with error " + apiResponse.get("error"));
                 results.put(res, apiResponse.get("results"));
             }
         }
@@ -136,9 +137,14 @@ public class IndicoResult {
         return rectangles;
     }
 
-    private Object get(Api name) throws IndicoException {
-        if (!results.containsKey(name))
-            throw new IndicoException(name.name + " was not included in the request");
-        return results.get(name);
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Map<String, Map<String, Double>>>> getIntersections() throws IndicoException {
+        throw new IndicoException("Intersections Api should be called with more than 1 example as a Batch Request");
+    }
+
+    private Object get(Api api) throws IndicoException {
+        if (!results.containsKey(api))
+            throw new IndicoException(api.toString() + " was not included in the request");
+        return results.get(api);
     }
 }

@@ -25,12 +25,12 @@ public class ImageApi extends ApiClient {
 
     public IndicoResult predict(String filePath, HashMap<String, Object> params)
         throws UnsupportedOperationException, IOException, IndicoException {
-        return predict(ImageUtils.convertToImage(filePath, api.getSize(params), api.minResize), ImageUtils.grabType(filePath), params);
+        return predict(new File(filePath), params);
     }
 
     public IndicoResult predict(File imageFile, HashMap<String, Object> params)
         throws UnsupportedOperationException, IOException, IndicoException {
-        return predict(ImageUtils.convertToImage(imageFile, api.getSize(params), api.minResize), ImageUtils.grabType(imageFile), params);
+        return predict(ImageUtils.convertToImage(imageFile, api.getSize(params), (Boolean) api.get("minResize")), ImageUtils.grabType(imageFile), params);
     }
 
     public IndicoResult predict(BufferedImage image, String type, HashMap<String, Object> params)
@@ -40,7 +40,7 @@ public class ImageApi extends ApiClient {
 
     public BatchIndicoResult predict(List<?> images, HashMap<String, Object> params)
         throws UnsupportedOperationException, IOException, IndicoException {
-        return predict(ImageUtils.convertToImage(images, api.getSize(params), api.minResize), ImageUtils.grabType(images), params);
+        return predict(ImageUtils.convertToImage(images, api.getSize(params), (Boolean) api.get("minResize")), ImageUtils.grabType(images), params);
     }
 
     public BatchIndicoResult predict(List<BufferedImage> images, String type, HashMap<String, Object> params)
@@ -60,12 +60,12 @@ public class ImageApi extends ApiClient {
 
     public IndicoResult predict(String filePath)
         throws UnsupportedOperationException, IOException, IndicoException {
-        return predict(ImageUtils.convertToImage(filePath, api.getSize(null), api.minResize), ImageUtils.grabType(filePath), null);
+        return predict(new File(filePath), null);
     }
 
     public IndicoResult predict(File imageFile)
         throws UnsupportedOperationException, IOException, IndicoException {
-        return predict(ImageUtils.convertToImage(imageFile, api.getSize(null), api.minResize), ImageUtils.grabType(imageFile), null);
+        return predict(ImageUtils.convertToImage(imageFile, (Integer) api.get("size"), (Boolean) api.get("minResize")), ImageUtils.grabType(imageFile), null);
     }
 
     public IndicoResult predict(BufferedImage image, String type)
@@ -75,7 +75,7 @@ public class ImageApi extends ApiClient {
 
     public BatchIndicoResult predict(List<?> images)
         throws UnsupportedOperationException, IOException, IndicoException {
-        return predict(ImageUtils.convertToImage(images, api.getSize(null), api.minResize), ImageUtils.grabType(images), null);
+        return predict(ImageUtils.convertToImage(images, (Integer) api.get("size"), (Boolean) api.get("minResize")), ImageUtils.grabType(images), null);
     }
 
     public BatchIndicoResult predict(List<BufferedImage> images, String type)

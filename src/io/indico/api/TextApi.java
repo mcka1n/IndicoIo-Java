@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.indico.api.results.BatchIndicoResult;
 import io.indico.api.results.IndicoResult;
@@ -32,16 +33,20 @@ public class TextApi extends ApiClient {
         return predict(Arrays.asList(data), null);
     }
 
-    public IndicoResult predict(String data, HashMap<String, Object> params) throws UnsupportedOperationException, IOException, IndicoException {
+    public IndicoResult predict(String data, Map<String, Object> params) throws UnsupportedOperationException, IOException, IndicoException {
         return call(api, data, params);
     }
 
-    public BatchIndicoResult predict(List<String> data, HashMap<String, Object> params) throws IOException, IndicoException {
+    public BatchIndicoResult predict(List<String> data, Map<String, Object> params) throws IOException, IndicoException {
         return call(api, data, params);
     }
 
-    public BatchIndicoResult predict(String[] data, HashMap<String, Object> params) throws IOException, IndicoException {
+    public BatchIndicoResult predict(String[] data, Map<String, Object> params) throws IOException, IndicoException {
         return predict(Arrays.asList(data), params);
+    }
+
+    public BatchIndicoResult predict(Map<String, Object> data, Map<String, Object> params) throws IOException, IndicoException {
+        return call(api, data, params);
     }
 
 }

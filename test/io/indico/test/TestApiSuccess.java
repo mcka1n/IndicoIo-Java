@@ -382,6 +382,77 @@ public class TestApiSuccess {
         assertTrue(result.getLanguage().size() == Language.values().length);
     }
 
+    @Test(expected=IndicoException.class)
+    public void testNotBatchIntersections() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        String example= "this is great!";
+        IndicoResult result = test.intersections.predict(example, new HashMap<String, Object>() {
+
+            private static final long serialVersionUID = 1215210703571708645L;
+
+            {
+                put("apis", new Api[]{Api.Sentiment, Api.Language});
+            }
+        });
+
+        result.getIntersections();
+    }
+
+   @Test
+    public void testIntersections() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        List<String> example= Arrays.asList("this is great!", "another text sample", "and a third example!");
+        BatchIndicoResult result = test.intersections.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 1215210703571708645L;
+            {
+                put("apis", new Api[]{ Api.Language, Api.Sentiment });
+            }
+        });
+
+       Map<String, Map<String, Map<String, Double>>> results = result.getIntersections();
+
+       assertTrue(results.containsKey(Language.English.toString()));
+       assertTrue(results.get(Language.English.toString())
+           .containsKey(Api.Sentiment.toString()));
+       assertTrue(results.get(Language.English.toString()).get(Api.Sentiment.toString())
+           .containsKey("correlation"));
+    }
+
+   @Test
+    public void testHistoricIntersections() throws IndicoException, IOException {
+        Indico test = new Indico(new File("config.properties"));
+
+        List<String> example= Arrays.asList("this is great!", "another text sample", "and a third example!");
+        BatchIndicoResult result = test.text.predict(example, new HashMap<String, Object>() {
+            private static final long serialVersionUID = 1215210703571708645L;
+
+            {
+                put("apis", new Api[]{Api.Language, Api.Sentiment});
+            }
+        });
+
+       Map<String, Object> historic = new HashMap<>();
+       historic.put(Api.Sentiment.toString(), result.getSentiment());
+       historic.put(Api.Language.toString(), result.getLanguage());
+
+       BatchIndicoResult results = test.intersections.predict(historic, new HashMap<String, Object>() {
+           private static final long serialVersionUID = 1215210703571708645L;
+           {
+               put("apis", new Api[]{Api.Language, Api.Sentiment});
+           }
+       });
+
+       Map<String, Map<String, Map<String, Double>>> historicResults = results.getIntersections();
+
+       assertTrue(historicResults.containsKey(Language.English.toString()));
+       assertTrue(historicResults.get(Language.English.toString())
+           .containsKey(Api.Sentiment.toString()));
+       assertTrue(historicResults.get(Language.English.toString()).get(Api.Sentiment.toString())
+           .containsKey("correlation"));
+    }
+
     @Test
     public void testPredictImageString() throws IndicoException, IOException {
         Indico test = new Indico(new File("config.properties"));
@@ -460,7 +531,7 @@ public class TestApiSuccess {
     public void testKeywordsLanguageAutoDetectApi() throws IndicoException, IOException {
         Indico test = new Indico(new File("config.properties"));
 
-        String example = "La semaine suivante, il remporte sa première victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell.";
+        String example = "La semaine suivante il remporte sa première victoire, dans la descente de Val Gardena en Italie, près de cinq ans après la dernière victoire en Coupe du monde d'un Français dans cette discipline, avec le succès de Nicolas Burtin à Kvitfjell";
         Set<String> words = new HashSet<>();
         Collections.addAll(words, example.replaceAll("\\p{P}", "").toLowerCase().split(" "));
         IndicoResult result = test.keywords.predict(example, new HashMap<String, Object>() {
