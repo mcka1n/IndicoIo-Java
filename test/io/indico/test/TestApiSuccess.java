@@ -640,7 +640,7 @@ public class TestApiSuccess {
 
         BatchIndicoResult result = test.contentFiltering.predict(example);
 
-        assertTrue(result.getContentFIltering().size() == 1);
+        assertTrue(result.getContentFiltering().size() == 1);
     }
 
     @Test

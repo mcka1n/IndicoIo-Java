@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.indico.Indico;
@@ -30,5 +31,19 @@ public class TestVersioning {
         }}).getLocalizedFer();
 
         assertTrue(results.size() == 1);
+    }
+
+    @Test
+    public void testImageFeaturesVersion2() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+
+        File lena = new File("bin/lena.png");
+
+        List<Double> results = test.imageFeatures.predict(lena, new HashMap<String, Object>() {{
+            put("detect", true);
+            put("version", 2);
+        }}).getImageFeatures();
+
+        assertTrue(results.size() == 4096);
     }
 }

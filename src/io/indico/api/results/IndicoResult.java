@@ -118,6 +118,11 @@ public class IndicoResult {
     }
 
     @SuppressWarnings("unchecked")
+    public Map<String, Double> getImageRecognition() throws IndicoException {
+        return (Map<String, Double>) get(Api.ImageRecognition);
+    }
+
+    @SuppressWarnings("unchecked")
     public Double getContentFiltering() throws IndicoException {
         return (Double) get(Api.ContentFiltering);
     }
