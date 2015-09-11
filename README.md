@@ -22,6 +22,33 @@ Supported APIs:
 - Language Detection
 - Text Topic Tagging
 
+Installation:
+------------
+<b> Method 1 - Installing with Maven</b>
+
+You can install the latest version of the indico module using Maven by including the following in your pom.xml file:
+``` xml
+<dependency>
+    <groupId>io.indico</groupId>
+    <artifactId>indico</artifactId>
+    <version>3.1.0</version>
+</dependency>
+```
+<b>Method 2 - Use the jar</b>
+
+You can also install indicoio by adding our jar to your project. We release both a "batteries included" jar that includes all of the indico dependencies, and an a-la-carte jar that includes only indico itself.
+
+Both are available for download on maven central, as well as the oss sonatype nexus. Instructions for using a jar in eclipse can be found here).
+
+<b>Method 3 - Downloading from Github</b>
+
+All of our client libraries are open source, so if you want the code itself feel free to grab it from github using the command below.
+``` bash
+git clone https://github.com/IndicoDataSolutions/IndicoIo-Java.git
+```
+
+ 
+
 Example:
 ------------
 ```java
