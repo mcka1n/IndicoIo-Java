@@ -163,6 +163,10 @@ public class ApiClient {
     }
 
     private String addUrlParams(Api api, Map<String, Object> extraParams) throws IndicoException {
+        if (extraParams == null) {
+            return "";
+        }
+
         StringBuilder builder = new StringBuilder();
         if (api.type == ApiType.Multi) {
             if (!extraParams.containsKey("apis"))
@@ -180,6 +184,11 @@ public class ApiClient {
             extraParams.remove("apis");
             builder.deleteCharAt(builder.length() - 1);
         }
+
+        if (extraParams.containsKey("version")) {
+            builder.append("&version=").append(extraParams.remove("version"));
+        }
+
         return builder.toString();
     }
 

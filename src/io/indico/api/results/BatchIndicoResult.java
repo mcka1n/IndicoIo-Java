@@ -133,7 +133,12 @@ public class BatchIndicoResult {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Double> getContentFIltering() throws IndicoException {
+    public List<Map<String, Double>> getImageRecognition() throws IndicoException {
+        return (List<Map<String, Double>>) get(Api.ImageRecognition);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Double> getContentFiltering() throws IndicoException {
         return (List<Double>) get(Api.ContentFiltering);
     }
 
