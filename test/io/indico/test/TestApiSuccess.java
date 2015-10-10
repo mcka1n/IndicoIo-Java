@@ -32,6 +32,7 @@ import io.indico.api.text.TextTag;
 import io.indico.api.utils.ImageUtils;
 import io.indico.api.utils.IndicoException;
 
+import static io.indico.api.utils.ImageUtils.resize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -53,11 +54,11 @@ public class TestApiSuccess {
 
     @Test
     public void testMinResize() throws IOException {
-        BufferedImage image = ImageUtils.convertToImage(new File("bin/lena.png"), 128, true);
+        BufferedImage image = resize(ImageIO.read(new File("bin/lena.png")), 128, true);
         assertEquals(image.getHeight(), 128);
         assertEquals(image.getWidth(), 128);
 
-        BufferedImage not_square = ImageUtils.convertToImage(new File("bin/not_square.png"), 128, true);
+        BufferedImage not_square = resize(ImageIO.read(new File("bin/not_square.png")), 128, true);
         assertTrue(not_square.getHeight() == Math.round(229.0/600.0*128.0));
         assertEquals(not_square.getWidth(), 128);
     }
@@ -251,6 +252,14 @@ public class TestApiSuccess {
         Map<FacialEmotion, Double> results = test.fer.predict(new File("bin/lena.png")).getFer();
         assertTrue(results.size() == FacialEmotion.values().length);
     }
+
+    @Test
+    public void testFERURL() throws IOException, IndicoException {
+        Indico test = new Indico(new File("config.properties"));
+        String url = "https://s3-us-west-2.amazonaws.com/indico-test-data/face.jpg";
+        Map<FacialEmotion, Double> results = test.fer.predict(url).getFer();
+        assertTrue(results.size() == FacialEmotion.values().length);
+    }
     
     @Test
     public void testFERImage() throws IOException, IndicoException {
@@ -258,7 +267,7 @@ public class TestApiSuccess {
         
         BufferedImage check = ImageIO.read(new File("bin/lena.png"));
 
-        Map<FacialEmotion, Double> results = test.fer.predict(check, "png").getFer();
+        Map<FacialEmotion, Double> results = test.fer.predict(check).getFer();
         assertTrue(results.size() == FacialEmotion.values().length);
     }
 
