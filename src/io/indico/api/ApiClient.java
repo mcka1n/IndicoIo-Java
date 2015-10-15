@@ -36,11 +36,6 @@ public class ApiClient {
         this(PUBLIC_BASE_URL, apiKey, privateCloud);
     }
 
-    IndicoResult call(Api api, BufferedImage data, String type, Map<String, Object> extraParams)
-        throws UnsupportedOperationException, IOException, IndicoException {
-        return call(api, ImageUtils.encodeImage(data, type), extraParams);
-    }
-
 
     IndicoResult call(Api api, String data, Map<String, Object> extraParams)
         throws UnsupportedOperationException, IOException, IndicoException {
@@ -53,14 +48,6 @@ public class ApiClient {
         throws UnsupportedOperationException, IOException, IndicoException {
         Map<String, List<?>> apiResponse = baseCall(api, data, extraParams);
         return new BatchIndicoResult(api, apiResponse);
-    }
-
-    BatchIndicoResult call(Api api, List<BufferedImage> data, String type, Map<String, Object> extraParams)
-        throws UnsupportedOperationException, IOException, IndicoException {
-        List<String> batchedData = new ArrayList<>(data.size());
-        for (BufferedImage image : data)
-            batchedData.add(ImageUtils.encodeImage(image, type));
-        return call(api, batchedData, extraParams);
     }
 
     BatchIndicoResult call(Api api, List<String> data, Map<String, Object> extraParams)

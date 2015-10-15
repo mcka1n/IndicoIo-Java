@@ -6,12 +6,16 @@ import org.imgscalr.Scalr;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -19,12 +23,12 @@ import javax.imageio.ImageIO;
  * Created by Chris on 6/23/15.
  */
 public class ImageUtils {
-    public static String encodeImage(BufferedImage image, String type) {
+    public static String encodeImage(BufferedImage image) {
         String imageString = null;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         try {
-            ImageIO.write(image, type, bos);
+            ImageIO.write(image, "PNG", bos);
             byte[] imageBytes = bos.toByteArray();
 
             imageString = Base64.encodeBase64String(imageBytes);
@@ -50,14 +54,16 @@ public class ImageUtils {
         return new Rectangle((left + right) / 2, (top + bottom) / 2, right - left, top - bottom);
     }
 
-    public static List<BufferedImage> convertToImage(List<?> images, int size, boolean minAxis)
+    public static List<String> convertToImage(List<?> images, int size, boolean minAxis)
         throws IOException {
-        List<BufferedImage> convertedInput = new ArrayList<>();
+        List<String> convertedInput = new ArrayList<>();
         for (Object entry : images) {
             if (entry instanceof File) {
-                convertedInput.add(convertToImage((File) entry, size, minAxis));
+                convertedInput.add(handleFile((File) entry, size, minAxis));
             } else if (entry instanceof String) {
-                convertedInput.add(convertToImage(new File((String) entry), size, minAxis));
+                convertedInput.add(handleString((String) entry, size, minAxis));
+            } else if (entry instanceof BufferedImage) {
+                convertedInput.add(handleImage((BufferedImage) entry, size, minAxis));
             } else {
                 throw new IllegalArgumentException(
                     "imageCall method only supports lists of Files and lists of Strings"
@@ -67,13 +73,50 @@ public class ImageUtils {
         return convertedInput;
     }
 
-    public static BufferedImage convertToImage(File imageFile, int size, boolean minAxis) throws IOException {
-        if (size == -1) {
-            return ImageIO.read(imageFile);
+    final private static Pattern base64_regex = Pattern.compile("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$");
+
+    public static String handleFile(File filePath, int size, boolean minAxis) throws IOException {
+        if (filePath.exists()) {
+            // If File
+            if (size == -1) { // No Resize
+                return ImageUtils.encodeImage(ImageIO.read(filePath));
+            }
+
+            return handleImage(ImageIO.read(filePath), size, minAxis);
+        } else {
+            throw new IllegalArgumentException("File input does not exist " + filePath.getAbsolutePath());
+        }
+    }
+
+    public static String handleImage(BufferedImage image, int size, boolean minAxis) throws IOException {
+        return ImageUtils.encodeImage(resize(image, size, minAxis));
+    }
+
+    public static String handleString(String imageString, int size, boolean minAxis) throws IOException {
+        BufferedImage image;
+        File imageFile = new File(imageString);
+        if (imageFile.exists()) {
+            return handleFile(imageFile, size, minAxis);
+        } else {
+            // If URL
+            try {
+                new URL(imageString);
+                return imageString;
+            } catch (MalformedURLException malformedURLException) {
+                // Check If Base64
+                boolean isBase64 = base64_regex.matcher(imageString).matches();
+                if (!isBase64) {
+                    throw new IllegalArgumentException("Invalid input image. Only file paths, base64 string, and urls are supported");
+                }
+
+                image = ImageIO.read(new ByteArrayInputStream(Base64.decodeBase64(imageString)));
+            }
         }
 
-        BufferedImage image = ImageIO.read(imageFile);
+        return handleImage(image, size, minAxis);
+    }
 
+    public static BufferedImage resize(BufferedImage image, int size, boolean minAxis) {
         double aspect = image.getWidth() / image.getHeight();
         if (aspect >= 10 || aspect <= .1)
             System.out.println("WARNING: We we recommend images with aspect ratio less than 1:10");
@@ -82,10 +125,6 @@ public class ImageUtils {
         return Scalr.resize(image, method, size);
     }
 
-
-    public static String grabType(String filePath) throws IOException {
-        return grabType(new File(filePath));
-    }
 
     public static String grabType(File imageFile) throws IOException {
         return FilenameUtils.getExtension(imageFile.getName());
